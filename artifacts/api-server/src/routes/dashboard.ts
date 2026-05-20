@@ -2,7 +2,6 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { assignments, notes, reminders, subjects } from "@workspace/db";
 import { eq, and, lte, gte, lt } from "drizzle-orm";
-import { GetWeeklyViewQueryParams } from "@workspace/api-zod";
 
 const router = Router();
 
@@ -96,10 +95,11 @@ router.get("/summary", async (req, res) => {
 });
 
 router.get("/week", async (req, res) => {
-  const parsed = GetWeeklyViewQueryParams.safeParse(req.query);
-  if (!parsed.success) return void res.status(400).json({ error: "Invalid query" });
+  const weekStart = req.query.weekStart as string | undefined;
+  if (!weekStart || !/^\d{4}-\d{2}-\d{2}$/.test(weekStart)) {
+    return void res.status(400).json({ error: "weekStart is required (YYYY-MM-DD)" });
+  }
   try {
-    const { weekStart } = parsed.data;
     const userId = req.auth?.userId ?? null;
 
     const weekStartDate = new Date(weekStart);
