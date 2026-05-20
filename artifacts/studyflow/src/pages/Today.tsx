@@ -2,7 +2,7 @@ import { useGetDashboardSummary, useListSubjects } from "@workspace/api-client-r
 import { getGetDashboardSummaryQueryKey } from "@workspace/api-client-react";
 import AISmartInput from "@/components/shared/AISmartInput";
 import AssignmentCard from "@/components/shared/AssignmentCard";
-import { Loader2, AlertTriangle, Calendar, Clock, CheckCircle } from "lucide-react";
+import { Loader2, AlertTriangle, Calendar, Clock, CheckCircle, Sparkles } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 export default function Today() {
