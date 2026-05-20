@@ -1,0 +1,14 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "EJDERHLNfLmAECMhPB3E_"
+uri = "file://artifacts/studyflow/public/hero-mockup.png"
+type = "image"
+title = "StudyFlow Dashboard Hero Mockup"
+
+[[generated]]
+id = "JgOcxM8qB6rdHF-hioNiv"
+uri = "file://artifacts/studyflow/public/ai-mockup.png"
+type = "image"
+title = "StudyFlow AI Feature Mockup"
