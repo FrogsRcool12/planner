@@ -3,13 +3,29 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: StudyFlow API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: assignments
+    description: Assignment operations
+  - name: subjects
+    description: Subject/class operations
+  - name: periods
+    description: Period operations
+  - name: notes
+    description: Note operations
+  - name: reminders
+    description: Reminder operations
+  - name: studyPlans
+    description: Study plan operations
+  - name: dashboard
+    description: Dashboard summary operations
+  - name: ai
+    description: AI-powered parsing operations
 paths:
   /healthz:
     get:
@@ -24,6 +40,461 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /subjects:
+    get:
+      operationId: listSubjects
+      tags: [subjects]
+      summary: List all subjects
+      responses:
+        "200":
+          description: List of subjects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Subject"
+    post:
+      operationId: createSubject
+      tags: [subjects]
+      summary: Create a subject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubjectInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subject"
+
+  /subjects/{id}:
+    patch:
+      operationId: updateSubject
+      tags: [subjects]
+      summary: Update a subject
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubjectUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subject"
+    delete:
+      operationId: deleteSubject
+      tags: [subjects]
+      summary: Delete a subject
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /assignments:
+    get:
+      operationId: listAssignments
+      tags: [assignments]
+      summary: List assignments
+      parameters:
+        - name: weekStart
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: subjectId
+          in: query
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: List of assignments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Assignment"
+    post:
+      operationId: createAssignment
+      tags: [assignments]
+      summary: Create an assignment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignmentInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Assignment"
+
+  /assignments/{id}:
+    get:
+      operationId: getAssignment
+      tags: [assignments]
+      summary: Get an assignment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Assignment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Assignment"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    patch:
+      operationId: updateAssignment
+      tags: [assignments]
+      summary: Update an assignment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignmentUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Assignment"
+    delete:
+      operationId: deleteAssignment
+      tags: [assignments]
+      summary: Delete an assignment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /notes:
+    get:
+      operationId: listNotes
+      tags: [notes]
+      summary: List notes
+      parameters:
+        - name: subjectId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: weekStart
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: period
+          in: query
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: List of notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Note"
+    post:
+      operationId: createNote
+      tags: [notes]
+      summary: Create a note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NoteInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Note"
+
+  /notes/{id}:
+    patch:
+      operationId: updateNote
+      tags: [notes]
+      summary: Update a note
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NoteUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Note"
+    delete:
+      operationId: deleteNote
+      tags: [notes]
+      summary: Delete a note
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /reminders:
+    get:
+      operationId: listReminders
+      tags: [reminders]
+      summary: List smart reminders
+      responses:
+        "200":
+          description: List of reminders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reminder"
+    post:
+      operationId: createReminder
+      tags: [reminders]
+      summary: Create a reminder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReminderInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reminder"
+
+  /reminders/{id}:
+    patch:
+      operationId: updateReminder
+      tags: [reminders]
+      summary: Update a reminder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReminderUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reminder"
+    delete:
+      operationId: deleteReminder
+      tags: [reminders]
+      summary: Delete a reminder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /study-plans:
+    get:
+      operationId: listStudyPlans
+      tags: [studyPlans]
+      summary: List study plans
+      parameters:
+        - name: assignmentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: List of study plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StudyPlan"
+    post:
+      operationId: createStudyPlan
+      tags: [studyPlans]
+      summary: Create a study plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudyPlanInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudyPlan"
+
+  /study-plans/{id}:
+    delete:
+      operationId: deleteStudyPlan
+      tags: [studyPlans]
+      summary: Delete a study plan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get today's dashboard summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/week:
+    get:
+      operationId: getWeeklyView
+      tags: [dashboard]
+      summary: Get full weekly planner data
+      parameters:
+        - name: weekStart
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Weekly view
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeeklyView"
+
+  /ai/parse:
+    post:
+      operationId: parseWithAI
+      tags: [ai]
+      summary: Parse unstructured text into structured assignments using AI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AIParseInput"
+      responses:
+        "200":
+          description: Parsed assignments ready to be saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AIParseResult"
+
+  /ai/generate-study-plan:
+    post:
+      operationId: generateStudyPlan
+      tags: [ai]
+      summary: Generate a study plan for an assignment using AI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudyPlanGenerateInput"
+      responses:
+        "200":
+          description: Generated study plan sessions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudyPlanGenerateResult"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +505,530 @@ components:
       required:
         - status
 
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    Subject:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        color:
+          type: string
+        period:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - color
+        - period
+        - createdAt
+
+    SubjectInput:
+      type: object
+      properties:
+        name:
+          type: string
+        color:
+          type: string
+        period:
+          type: ["integer", "null"]
+      required:
+        - name
+        - color
+
+    SubjectUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        color:
+          type: string
+        period:
+          type: ["integer", "null"]
+
+    Assignment:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        subjectId:
+          type: ["integer", "null"]
+        subjectName:
+          type: ["string", "null"]
+        subjectColor:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+          format: date
+        period:
+          type: ["integer", "null"]
+        taskType:
+          type: string
+          enum: [assignment, homework, quiz, test, reminder, studySession, note]
+        status:
+          type: string
+          enum: [notStarted, inProgress, completed, submitted]
+        priority:
+          type: integer
+          minimum: 1
+          maximum: 5
+        workloadMinutes:
+          type: ["integer", "null"]
+        difficulty:
+          type: ["string", "null"]
+          enum: [easy, medium, hard, null]
+        urgency:
+          type: ["string", "null"]
+          enum: [low, medium, high, null]
+        aiGenerated:
+          type: boolean
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - description
+        - subjectId
+        - subjectName
+        - subjectColor
+        - dueDate
+        - period
+        - taskType
+        - status
+        - priority
+        - workloadMinutes
+        - difficulty
+        - urgency
+        - aiGenerated
+        - notes
+        - createdAt
+
+    AssignmentInput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        subjectId:
+          type: ["integer", "null"]
+        dueDate:
+          type: ["string", "null"]
+          format: date
+        period:
+          type: ["integer", "null"]
+        taskType:
+          type: string
+          enum: [assignment, homework, quiz, test, reminder, studySession, note]
+        status:
+          type: string
+          enum: [notStarted, inProgress, completed, submitted]
+        priority:
+          type: integer
+          minimum: 1
+          maximum: 5
+        workloadMinutes:
+          type: ["integer", "null"]
+        difficulty:
+          type: ["string", "null"]
+          enum: [easy, medium, hard, null]
+        urgency:
+          type: ["string", "null"]
+          enum: [low, medium, high, null]
+        notes:
+          type: ["string", "null"]
+        aiGenerated:
+          type: boolean
+      required:
+        - title
+        - taskType
+        - status
+        - priority
+
+    AssignmentUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        subjectId:
+          type: ["integer", "null"]
+        dueDate:
+          type: ["string", "null"]
+          format: date
+        period:
+          type: ["integer", "null"]
+        taskType:
+          type: string
+          enum: [assignment, homework, quiz, test, reminder, studySession, note]
+        status:
+          type: string
+          enum: [notStarted, inProgress, completed, submitted]
+        priority:
+          type: integer
+          minimum: 1
+          maximum: 5
+        workloadMinutes:
+          type: ["integer", "null"]
+        difficulty:
+          type: ["string", "null"]
+          enum: [easy, medium, hard, null]
+        urgency:
+          type: ["string", "null"]
+          enum: [low, medium, high, null]
+        notes:
+          type: ["string", "null"]
+
+    Note:
+      type: object
+      properties:
+        id:
+          type: integer
+        content:
+          type: string
+        subjectId:
+          type: ["integer", "null"]
+        subjectName:
+          type: ["string", "null"]
+        subjectColor:
+          type: ["string", "null"]
+        period:
+          type: ["integer", "null"]
+        weekStart:
+          type: ["string", "null"]
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - content
+        - subjectId
+        - subjectName
+        - subjectColor
+        - period
+        - weekStart
+        - createdAt
+        - updatedAt
+
+    NoteInput:
+      type: object
+      properties:
+        content:
+          type: string
+        subjectId:
+          type: ["integer", "null"]
+        period:
+          type: ["integer", "null"]
+        weekStart:
+          type: ["string", "null"]
+          format: date
+      required:
+        - content
+
+    NoteUpdate:
+      type: object
+      properties:
+        content:
+          type: string
+        subjectId:
+          type: ["integer", "null"]
+        period:
+          type: ["integer", "null"]
+        weekStart:
+          type: ["string", "null"]
+          format: date
+
+    Reminder:
+      type: object
+      properties:
+        id:
+          type: integer
+        message:
+          type: string
+        type:
+          type: string
+          enum: [smart, manual]
+        isRead:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - message
+        - type
+        - isRead
+        - createdAt
+
+    ReminderInput:
+      type: object
+      properties:
+        message:
+          type: string
+        type:
+          type: string
+          enum: [smart, manual]
+      required:
+        - message
+        - type
+
+    ReminderUpdate:
+      type: object
+      properties:
+        isRead:
+          type: boolean
+
+    StudyPlan:
+      type: object
+      properties:
+        id:
+          type: integer
+        assignmentId:
+          type: integer
+        assignmentTitle:
+          type: ["string", "null"]
+        date:
+          type: string
+          format: date
+        activity:
+          type: string
+        durationMinutes:
+          type: ["integer", "null"]
+        completed:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - assignmentId
+        - assignmentTitle
+        - date
+        - activity
+        - durationMinutes
+        - completed
+        - createdAt
+
+    StudyPlanInput:
+      type: object
+      properties:
+        assignmentId:
+          type: integer
+        date:
+          type: string
+          format: date
+        activity:
+          type: string
+        durationMinutes:
+          type: ["integer", "null"]
+        completed:
+          type: boolean
+      required:
+        - assignmentId
+        - date
+        - activity
+
+    DashboardSummary:
+      type: object
+      properties:
+        todayAssignments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Assignment"
+        overdueAssignments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Assignment"
+        upcomingTests:
+          type: array
+          items:
+            $ref: "#/components/schemas/Assignment"
+        totalWorkloadMinutesToday:
+          type: integer
+        urgentCount:
+          type: integer
+        completedTodayCount:
+          type: integer
+        reminders:
+          type: array
+          items:
+            $ref: "#/components/schemas/Reminder"
+      required:
+        - todayAssignments
+        - overdueAssignments
+        - upcomingTests
+        - totalWorkloadMinutesToday
+        - urgentCount
+        - completedTodayCount
+        - reminders
+
+    DayView:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        dayName:
+          type: string
+        assignments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Assignment"
+        notes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Note"
+        totalWorkloadMinutes:
+          type: integer
+      required:
+        - date
+        - dayName
+        - assignments
+        - notes
+        - totalWorkloadMinutes
+
+    WeeklyView:
+      type: object
+      properties:
+        weekStart:
+          type: string
+          format: date
+        days:
+          type: array
+          items:
+            $ref: "#/components/schemas/DayView"
+      required:
+        - weekStart
+        - days
+
+    AIParseInput:
+      type: object
+      properties:
+        text:
+          type: string
+        subjects:
+          type: array
+          items:
+            $ref: "#/components/schemas/Subject"
+      required:
+        - text
+
+    ParsedAssignment:
+      type: object
+      properties:
+        title:
+          type: string
+        subjectName:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+          format: date
+        period:
+          type: ["integer", "null"]
+        taskType:
+          type: string
+          enum: [assignment, homework, quiz, test, reminder, studySession, note]
+        priority:
+          type: integer
+          minimum: 1
+          maximum: 5
+        workloadMinutes:
+          type: ["integer", "null"]
+        difficulty:
+          type: ["string", "null"]
+          enum: [easy, medium, hard, null]
+        urgency:
+          type: ["string", "null"]
+          enum: [low, medium, high, null]
+        notes:
+          type: ["string", "null"]
+      required:
+        - title
+        - subjectName
+        - dueDate
+        - period
+        - taskType
+        - priority
+        - workloadMinutes
+        - difficulty
+        - urgency
+        - notes
+
+    AIParseResult:
+      type: object
+      properties:
+        assignments:
+          type: array
+          items:
+            $ref: "#/components/schemas/ParsedAssignment"
+      required:
+        - assignments
+
+    StudyPlanGenerateInput:
+      type: object
+      properties:
+        assignmentId:
+          type: integer
+        assignmentTitle:
+          type: string
+        dueDate:
+          type: string
+          format: date
+        subject:
+          type: ["string", "null"]
+        currentDate:
+          type: string
+          format: date
+      required:
+        - assignmentId
+        - assignmentTitle
+        - dueDate
+        - currentDate
+
+    StudySession:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        activity:
+          type: string
+        durationMinutes:
+          type: integer
+      required:
+        - date
+        - activity
+        - durationMinutes
+
+    StudyPlanGenerateResult:
+      type: object
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: "#/components/schemas/StudySession"
+      required:
+        - sessions

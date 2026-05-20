@@ -1,0 +1,279 @@
+Build a modern AI-powered school planner web app for students called “StudyFlow.”
+
+The app should be fully school-focused and designed around a 7-period school day structure.
+
+STYLE / DESIGN:
+
+* Clean modern UI
+* Apple-level minimalism
+* Smooth animations
+* Rounded corners
+* Soft shadows
+* Responsive for laptop and mobile
+* Dark mode and light mode
+* Color-coded subjects/classes
+* Use modern fonts and spacing
+* Make it feel like a premium productivity app for students
+
+TECH STACK:
+
+* Next.js
+* React
+* Tailwind CSS
+* Supabase or Firebase backend
+* OpenAI API integration
+* Google authentication/login
+
+CORE CONCEPT:
+Students paste or type messy school information into an AI input box. The AI automatically extracts assignments, tests, due dates, periods, notes, and priorities, then organizes everything into a weekly planner.
+
+MAIN FEATURES:
+
+1. WEEKLY PLANNER HOME SCREEN
+
+* Main homepage should display a full weekly spread
+* Monday through Sunday columns
+* Each day divided into:
+
+  * Period 1
+  * Period 2
+  * Period 3
+  * Period 4
+  * Period 5
+  * Period 6
+  * Period 7
+* Each period block can contain:
+
+  * assignments
+  * homework
+  * quizzes/tests
+  * notes
+  * reminders
+  * study sessions
+
+The planner should visually resemble a modern digital paper planner.
+
+2. TODAY VIEW
+   Create a separate “Today” dashboard that displays:
+
+* today’s assignments
+* overdue tasks
+* upcoming tests
+* workload estimate
+* urgent items
+* unfinished assignments
+* next class period
+* motivational productivity stats
+
+3. AI INPUT BOX (MOST IMPORTANT FEATURE)
+   At the top of the app, create a large AI input area where students can paste or type messy information.
+
+Example input:
+“Math worksheet due tomorrow, biology quiz Friday on cell division, history essay due next Wednesday, finish English reading tonight.”
+
+The AI should automatically extract:
+
+* assignment title
+* subject
+* due date
+* period/class
+* workload estimate
+* task type
+* urgency
+* notes
+* recommended priority stars
+
+The AI should then automatically place everything into the planner.
+
+Use OpenAI API for parsing.
+
+4. PRIORITY STAR SYSTEM
+   Each task should receive a priority rating:
+   ⭐ 1 Star = optional / low importance
+   ⭐⭐ 2 Stars = small homework
+   ⭐⭐⭐ 3 Stars = standard assignment
+   ⭐⭐⭐⭐ 4 Stars = major assignment/test prep
+   ⭐⭐⭐⭐⭐ 5 Stars = urgent / high importance
+
+Allow:
+
+* AI suggested priority
+* manual student override
+
+5. TASK STATUS SYSTEM
+   Each assignment should support:
+
+* Not Started
+* In Progress
+* Completed
+* Submitted
+
+Include satisfying completion animations/checkmarks.
+
+6. COLOR CODING
+   Allow subjects to have custom colors:
+
+* Math
+* Science
+* English
+* History
+* Electives
+  etc.
+
+Tasks and notes should visually match subject colors.
+
+7. NOTES SYSTEM
+   Each class period should support:
+
+* quick notes
+* attached reminders
+* saved notes
+* editable text
+* note history
+
+Students should be able to access notes from:
+
+* up to 5 weeks ago
+* and plan up to 5 weeks ahead
+
+8. SMART REMINDERS
+   Generate intelligent reminders such as:
+
+* “You haven’t started your 5-star assignment.”
+* “3 assignments are due tomorrow.”
+* “Thursday has a very heavy workload.”
+
+9. SMART WORKLOAD ESTIMATION
+   AI should estimate:
+
+* estimated completion time
+* difficulty
+* workload level
+
+Example:
+
+* “15 min”
+* “45 min”
+* “2 hours”
+
+Display daily workload totals.
+
+10. QUICK ADD BUTTON
+    Create floating quick-add button for:
+
+* assignment
+* test
+* reminder
+* note
+* study session
+
+11. STUDY PLAN FEATURE
+    For large assignments/tests, AI can optionally generate:
+
+* study schedules
+* review plans
+* recommended study sessions
+
+Example:
+“Biology Test Friday”
+→ Tuesday: vocab review
+→ Wednesday: diagrams
+→ Thursday: practice quiz
+
+12. NAVIGATION
+    Main navigation tabs:
+
+* Week
+* Today
+* Notes
+* Tasks
+* Settings
+
+13. SETTINGS PAGE
+    Allow students to customize:
+
+* subject names
+* colors
+* class periods
+* notifications
+* dark/light mode
+* school schedule
+
+14. DATABASE STRUCTURE
+    Store:
+
+* users
+* assignments
+* tasks
+* periods
+* notes
+* reminders
+* priorities
+* study plans
+* workload estimates
+
+15. FUTURE-READY ARCHITECTURE
+    Structure code cleanly so future features can be added:
+
+* image upload parsing
+* Google Classroom integration
+* teacher mode
+* collaboration
+* mobile app
+
+16. UX GOALS
+    The app should feel:
+
+* fast
+* frictionless
+* highly visual
+* satisfying to use
+* organized
+* student-friendly
+* addictive in a productive way
+
+17. LANDING PAGE
+    Create a modern landing page before login with:
+
+* app name/logo
+* feature showcase
+* screenshots/mockups
+* “Organize school automatically with AI”
+* sign in button
+* testimonials section
+* premium student productivity aesthetic
+
+18. IMPORTANT UI DETAILS
+
+* Drag-and-drop tasks
+* Smooth transitions
+* Hover effects
+* Calendar animations
+* Auto-save everything
+* Mobile responsive
+* Sticky headers
+* Beautiful planner grid layout
+
+19. INITIAL DEMO DATA
+    Populate demo account with:
+
+* realistic student assignments
+* notes
+* quizzes
+* color-coded subjects
+* workload examples
+
+20. OVERALL PRODUCT GOAL
+    This should feel like:
+
+* a modern AI academic operating system
+* specifically designed for students
+* combining:
+
+  * digital planner
+  * AI assistant
+  * assignment tracker
+  * study organizer
+  * note system
+
+Prioritize UX quality and visual polish heavily.
