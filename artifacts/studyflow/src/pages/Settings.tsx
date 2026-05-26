@@ -156,7 +156,7 @@ export default function Settings() {
             <button
               key={c}
               type="button"
-              className={`w-6 h-6 rounded-full border-2 ${newSubjColor === c ? 'border-primary' : 'border-transparent'}`}
+              className={`w-6 h-6 rounded-full border-2 cursor-pointer transition-transform hover:scale-110 ${newSubjColor === c ? 'border-primary' : 'border-transparent'}`}
               style={{ backgroundColor: c }}
               onClick={() => setNewSubjColor(c)}
             />
