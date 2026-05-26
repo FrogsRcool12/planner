@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { Assignment } from "@workspace/api-client-react/src/generated/api.schemas";
 import { CheckCircle2, Circle, Clock, FileText, Calendar as CalendarIcon, BookOpen, BrainCircuit } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUpdateAssignment } from "@workspace/api-client-react";
 import { queryClient } from "@/lib/queryClient";
+import AssignmentEditSheet from "./AssignmentEditSheet";
 
 export default function AssignmentCard({ assignment, compact = false }: { assignment: Assignment, compact?: boolean }) {
+  const [editOpen, setEditOpen] = useState(false);
   const updateMutation = useUpdateAssignment();
 
   const toggleStatus = (e: React.MouseEvent) => {
@@ -33,6 +36,7 @@ export default function AssignmentCard({ assignment, compact = false }: { assign
   const isCompleted = assignment.status === 'completed' || assignment.status === 'submitted';
 
   return (
+    <>
     <div 
       className={cn(
         "group relative rounded-lg border p-3 shadow-sm transition-all hover-elevate cursor-pointer",
@@ -40,6 +44,7 @@ export default function AssignmentCard({ assignment, compact = false }: { assign
         compact ? "p-2" : "p-4"
       )}
       style={!isCompleted && assignment.subjectColor ? { borderLeftColor: assignment.subjectColor, borderLeftWidth: '4px' } : {}}
+      onClick={() => setEditOpen(true)}
     >
       <div className="flex items-start gap-3">
         <button 
@@ -103,5 +108,7 @@ export default function AssignmentCard({ assignment, compact = false }: { assign
         </div>
       </div>
     </div>
+    <AssignmentEditSheet assignment={assignment} open={editOpen} onOpenChange={setEditOpen} />
+    </>
   );
 }
