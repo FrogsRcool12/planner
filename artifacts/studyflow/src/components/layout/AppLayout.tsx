@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import QuickAddSheet from "../shared/QuickAddSheet";
+import TutorialModal from "../shared/TutorialModal";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { isSignedIn, isLoaded } = useAuth();
@@ -137,6 +138,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </Button>
 
       <QuickAddSheet open={quickAddOpen} onOpenChange={setQuickAddOpen} />
+      <TutorialModal />
     </div>
   );
 }

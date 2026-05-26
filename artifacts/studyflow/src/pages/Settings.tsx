@@ -187,6 +187,21 @@ export default function Settings() {
         </div>
       </section>
 
+      {/* Help */}
+      <section className="space-y-4 bg-card p-6 rounded-xl border border-border shadow-sm">
+        <h2 className="text-xl font-semibold">Help</h2>
+        <p className="text-sm text-muted-foreground">New to StudyFlow? Replay the onboarding tutorial to learn about all the features.</p>
+        <Button
+          variant="outline"
+          onClick={() => {
+            localStorage.removeItem("studyflow_tutorial_completed");
+            window.location.reload();
+          }}
+        >
+          Replay Tutorial
+        </Button>
+      </section>
+
       {/* Account */}
       <section className="space-y-4 bg-card p-6 rounded-xl border border-border shadow-sm">
         <h2 className="text-xl font-semibold">Account</h2>
