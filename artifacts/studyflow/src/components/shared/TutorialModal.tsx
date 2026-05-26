@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -408,6 +409,7 @@ export default function TutorialModal() {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     const completed = localStorage.getItem(STORAGE_KEY);
@@ -422,7 +424,7 @@ export default function TutorialModal() {
       setDirection(1);
       setStep((s) => s + 1);
     } else {
-      handleClose();
+      handleComplete();
     }
   }
 
@@ -431,6 +433,12 @@ export default function TutorialModal() {
       setDirection(-1);
       setStep((s) => s - 1);
     }
+  }
+
+  function handleComplete() {
+    localStorage.setItem(STORAGE_KEY, "true");
+    setOpen(false);
+    setLocation("/settings");
   }
 
   function handleClose() {
