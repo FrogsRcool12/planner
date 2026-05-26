@@ -1,586 +1,480 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
+  ChevronRight,
+  ChevronLeft,
+  X,
+  Zap,
   Sparkles,
   Calendar,
   LayoutDashboard,
   Star,
   CheckSquare,
   Plus,
-  ChevronRight,
-  ChevronLeft,
-  X,
-  Zap,
-  BookOpen,
 } from "lucide-react";
 
 const STORAGE_KEY = "studyflow_tutorial_completed";
+const PAD = 12;
 
-interface Step {
+interface SpotlightRect { x: number; y: number; w: number; h: number; }
+
+interface StepConfig {
   id: string;
   icon: React.ReactNode;
+  page: string | null;
+  targetSelector: string | null;
   title: string;
   description: string;
-  visual: React.ReactNode;
+  cta: string | null;
   accentColor: string;
+  tooltipSide?: "auto" | "top" | "bottom";
 }
 
-function AIInputIllustration() {
-  return (
-    <div className="w-full rounded-xl bg-muted/50 border border-border p-4 space-y-3">
-      <div className="rounded-lg border border-border bg-background p-3 text-sm text-muted-foreground font-mono leading-relaxed">
-        "Math worksheet due tomorrow, biology quiz on Friday, history essay next Monday 1000 words..."
-      </div>
-      <div className="flex items-center gap-2">
-        <div className="h-1 flex-1 rounded-full bg-muted overflow-hidden">
-          <motion.div
-            className="h-full bg-primary rounded-full"
-            initial={{ width: "0%" }}
-            animate={{ width: "75%" }}
-            transition={{ delay: 0.4, duration: 1.2, ease: "easeInOut" }}
-          />
-        </div>
-        <span className="text-xs text-primary font-medium">Parsing...</span>
-      </div>
-      <div className="space-y-2">
-        {[
-          { subject: "Math", task: "Worksheet", due: "Tomorrow", color: "#6366f1" },
-          { subject: "Biology", task: "Quiz", due: "Friday", color: "#10b981" },
-          { subject: "History", task: "Essay", due: "Monday", color: "#ef4444" },
-        ].map((item, i) => (
-          <motion.div
-            key={item.task}
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.6 + i * 0.2 }}
-            className="flex items-center gap-3 bg-background rounded-lg border border-border px-3 py-2"
-          >
-            <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ background: item.color }} />
-            <span className="text-sm font-medium flex-1">{item.subject} — {item.task}</span>
-            <span className="text-xs text-muted-foreground">{item.due}</span>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function WeekGridIllustration() {
-  const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-  const cards = [
-    { day: 0, period: 0, label: "Math HW", color: "#6366f1" },
-    { day: 1, period: 1, label: "Bio Quiz", color: "#10b981" },
-    { day: 2, period: 2, label: "History", color: "#ef4444" },
-    { day: 3, period: 0, label: "Chem Lab", color: "#8b5cf6" },
-    { day: 4, period: 1, label: "English", color: "#f59e0b" },
-  ];
-
-  return (
-    <div className="w-full rounded-xl border border-border bg-card overflow-hidden">
-      <div className="grid grid-cols-[48px_repeat(5,1fr)] border-b border-border bg-muted/30">
-        <div className="p-2" />
-        {days.map((d) => (
-          <div key={d} className="p-2 text-center text-xs font-semibold text-muted-foreground">{d}</div>
-        ))}
-      </div>
-      {[0, 1, 2].map((period) => (
-        <div key={period} className="grid grid-cols-[48px_repeat(5,1fr)] border-b border-border last:border-b-0 min-h-[44px]">
-          <div className="flex items-center justify-center border-r border-border">
-            <span className="text-[10px] font-semibold text-muted-foreground">P{period + 1}</span>
-          </div>
-          {days.map((_, di) => {
-            const card = cards.find((c) => c.day === di && c.period === period);
-            return (
-              <div key={di} className="border-r border-border last:border-r-0 p-1">
-                {card && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.85 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2 + (di + period) * 0.08 }}
-                    className="rounded px-2 py-1 text-[10px] font-medium text-white truncate"
-                    style={{ background: card.color }}
-                  >
-                    {card.label}
-                  </motion.div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function TodayIllustration() {
-  return (
-    <div className="w-full space-y-3">
-      <div className="grid grid-cols-3 gap-2">
-        {[
-          { label: "Due Today", value: "4", color: "text-primary" },
-          { label: "Overdue", value: "2", color: "text-red-500" },
-          { label: "Done", value: "1", color: "text-green-500" },
-        ].map((stat, i) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 + i * 0.1 }}
-            className="rounded-xl border border-border bg-card p-3 text-center"
-          >
-            <div className={cn("text-2xl font-bold", stat.color)}>{stat.value}</div>
-            <div className="text-[10px] text-muted-foreground mt-0.5">{stat.label}</div>
-          </motion.div>
-        ))}
-      </div>
-      <div className="rounded-xl border border-border bg-card p-3 space-y-2">
-        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Smart Reminders</p>
-        {[
-          "Biology quiz in 2 days — haven't started yet!",
-          "Math test Friday — high priority",
-        ].map((msg, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, x: -6 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 + i * 0.15 }}
-            className="flex gap-2 items-start text-sm"
-          >
-            <Sparkles className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
-            <span className="text-xs text-foreground leading-snug">{msg}</span>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function PriorityIllustration() {
-  return (
-    <div className="w-full space-y-2">
-      {[
-        { stars: 5, label: "Urgent — exam tomorrow", color: "#ef4444" },
-        { stars: 4, label: "Major test / big assignment", color: "#f59e0b" },
-        { stars: 3, label: "Standard homework", color: "#6366f1" },
-        { stars: 2, label: "Small task", color: "#10b981" },
-        { stars: 1, label: "Optional / low priority", color: "#94a3b8" },
-      ].map((row, i) => (
-        <motion.div
-          key={row.stars}
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1 + i * 0.1 }}
-          className="flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2"
-        >
-          <div className="flex gap-0.5">
-            {Array.from({ length: 5 }).map((_, si) => (
-              <Star
-                key={si}
-                className="h-3.5 w-3.5"
-                style={{ color: si < row.stars ? row.color : "#e2e8f0", fill: si < row.stars ? row.color : "#e2e8f0" }}
-              />
-            ))}
-          </div>
-          <span className="text-xs text-foreground">{row.label}</span>
-        </motion.div>
-      ))}
-    </div>
-  );
-}
-
-function StatusIllustration() {
-  const statuses = [
-    { label: "Not Started", badge: "bg-muted text-muted-foreground" },
-    { label: "In Progress", badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" },
-    { label: "Completed", badge: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300" },
-    { label: "Submitted", badge: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300" },
-  ];
-
-  return (
-    <div className="w-full space-y-2">
-      <div className="flex justify-between items-center gap-1 mb-4">
-        {statuses.map((s, i) => (
-          <motion.div
-            key={s.label}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.12 }}
-            className="flex flex-col items-center gap-2 flex-1"
-          >
-            <div className={cn("text-center text-[10px] font-semibold px-2 py-1 rounded-full w-full", s.badge)}>
-              {s.label}
-            </div>
-            {i < statuses.length - 1 && (
-              <ChevronRight className="h-3 w-3 text-muted-foreground absolute" style={{ display: "none" }} />
-            )}
-          </motion.div>
-        ))}
-      </div>
-      <div className="rounded-lg border border-border bg-card p-3 space-y-2">
-        {["Math Worksheet", "Biology Quiz", "History Essay"].map((title, i) => (
-          <motion.div
-            key={title}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 + i * 0.15 }}
-            className="flex items-center justify-between gap-2"
-          >
-            <span className="text-xs font-medium">{title}</span>
-            <span className={cn(
-              "text-[10px] font-semibold px-2 py-0.5 rounded-full",
-              i === 0 ? statuses[0].badge : i === 1 ? statuses[1].badge : statuses[2].badge
-            )}>
-              {i === 0 ? statuses[0].label : i === 1 ? statuses[1].label : statuses[2].label}
-            </span>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function QuickAddIllustration() {
-  return (
-    <div className="w-full flex flex-col items-center gap-6">
-      <motion.div
-        initial={{ scale: 0.6, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 20 }}
-        className="h-16 w-16 rounded-full bg-primary shadow-lg shadow-primary/30 flex items-center justify-center"
-      >
-        <Plus className="h-8 w-8 text-white" />
-      </motion.div>
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="w-full rounded-xl border border-border bg-card p-4 space-y-3"
-      >
-        <div className="h-8 rounded-md bg-muted/60 flex items-center px-3">
-          <span className="text-xs text-muted-foreground">Task title...</span>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div className="h-7 rounded-md bg-muted/60" />
-          <div className="h-7 rounded-md bg-muted/60" />
-        </div>
-        <div className="flex gap-2">
-          {[1, 2, 3, 4, 5].map((n) => (
-            <Star
-              key={n}
-              className="h-5 w-5"
-              style={{ color: n <= 3 ? "#6366f1" : "#e2e8f0", fill: n <= 3 ? "#6366f1" : "#e2e8f0" }}
-            />
-          ))}
-        </div>
-        <div className="h-8 rounded-md bg-primary/90 flex items-center justify-center">
-          <span className="text-xs font-semibold text-white">Add Task</span>
-        </div>
-      </motion.div>
-    </div>
-  );
-}
-
-function ReadyIllustration() {
-  const items = [
-    { icon: Sparkles, label: "AI parsing", color: "#6366f1" },
-    { icon: Calendar, label: "Weekly planner", color: "#10b981" },
-    { icon: LayoutDashboard, label: "Today view", color: "#f59e0b" },
-    { icon: Star, label: "Priority system", color: "#ef4444" },
-    { icon: CheckSquare, label: "Task tracker", color: "#8b5cf6" },
-    { icon: BookOpen, label: "Notes", color: "#06b6d4" },
-  ];
-
-  return (
-    <div className="grid grid-cols-3 gap-3 w-full">
-      {items.map((item, i) => {
-        const Icon = item.icon;
-        return (
-          <motion.div
-            key={item.label}
-            initial={{ opacity: 0, scale: 0.7 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.05 + i * 0.08, type: "spring", stiffness: 300, damping: 22 }}
-            className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-3"
-          >
-            <div
-              className="h-10 w-10 rounded-lg flex items-center justify-center"
-              style={{ background: `${item.color}20` }}
-            >
-              <Icon className="h-5 w-5" style={{ color: item.color }} />
-            </div>
-            <span className="text-[10px] font-medium text-center text-muted-foreground leading-tight">{item.label}</span>
-          </motion.div>
-        );
-      })}
-    </div>
-  );
-}
-
-const STEPS: Step[] = [
+const STEPS: StepConfig[] = [
   {
     id: "welcome",
     icon: <Zap className="h-6 w-6" />,
+    page: null,
+    targetSelector: null,
     title: "Welcome to StudyFlow",
-    description: "Your AI-powered academic operating system. Let's take a quick tour so you can hit the ground running.",
-    visual: (
-      <div className="flex flex-col items-center gap-4">
-        <motion.div
-          initial={{ scale: 0.5, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 260, damping: 20 }}
-          className="h-24 w-24 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/30"
-        >
-          <span className="text-4xl font-bold text-white">SF</span>
-        </motion.div>
-        <motion.p
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="text-sm text-muted-foreground text-center max-w-xs leading-relaxed"
-        >
-          Drop in your syllabus, paste an assignment, or just type what's due. StudyFlow extracts it, schedules it, and helps you get it done.
-        </motion.p>
-      </div>
-    ),
+    description: "Your AI-powered academic operating system. Let's take a 60-second tour of the key features.",
+    cta: null,
     accentColor: "#6366f1",
   },
   {
     id: "ai-input",
     icon: <Sparkles className="h-6 w-6" />,
+    page: "/week",
+    targetSelector: "[data-tutorial='ai-input']",
     title: "AI Smart Input",
-    description: "Paste any messy school text — a syllabus, email, or just your own notes — and the AI extracts structured tasks automatically.",
-    visual: <AIInputIllustration />,
+    description: "Paste any messy school text here — a syllabus, assignment email, anything — and the AI extracts your tasks automatically.",
+    cta: "Try pasting some text, then hit \"Parse with AI\"",
     accentColor: "#6366f1",
   },
   {
-    id: "weekly-planner",
+    id: "week-grid",
     icon: <Calendar className="h-6 w-6" />,
+    page: "/week",
+    targetSelector: "[data-tutorial='week-grid']",
     title: "Weekly Planner",
-    description: "A 7-day × 7-period grid shows everything at a glance. Assignments are color-coded by subject so you can see your workload instantly.",
-    visual: <WeekGridIllustration />,
+    description: "Your 7-day × 7-period grid. Each assignment is color-coded by subject so you can see your full workload at a glance.",
+    cta: "Use the arrows above to navigate between weeks",
     accentColor: "#10b981",
   },
   {
-    id: "today",
+    id: "today-overview",
     icon: <LayoutDashboard className="h-6 w-6" />,
+    page: "/today",
+    targetSelector: "[data-tutorial='today-overview']",
     title: "Today Dashboard",
-    description: "Open your day and see exactly what needs doing — due today, overdue, upcoming tests, and AI-generated smart reminders.",
-    visual: <TodayIllustration />,
+    description: "See your day at a glance — tasks due today, overdue items, upcoming tests, and AI-generated smart reminders.",
+    cta: "Check this every morning to plan your day",
     accentColor: "#f59e0b",
   },
   {
     id: "priority",
     icon: <Star className="h-6 w-6" />,
+    page: "/today",
+    targetSelector: "[data-tutorial='today-assignments']",
     title: "Priority Stars",
-    description: "Rate every task from 1 to 5 stars. The AI suggests a priority based on due date and type, but you're always in control.",
-    visual: <PriorityIllustration />,
+    description: "Each task has a 1–5 star priority. The AI suggests one based on due date and type, but you're always in control.",
+    cta: "Click any task card to edit its priority",
     accentColor: "#f59e0b",
   },
   {
     id: "status",
     icon: <CheckSquare className="h-6 w-6" />,
+    page: "/today",
+    targetSelector: "[data-tutorial='today-assignments']",
     title: "Task Status",
-    description: "Move tasks through four stages: Not Started → In Progress → Completed → Submitted. Stay organized from start to finish.",
-    visual: <StatusIllustration />,
+    description: "Track tasks through four stages: Not Started → In Progress → Completed → Submitted. One click advances the status.",
+    cta: "Click a task's status badge to advance it",
     accentColor: "#8b5cf6",
   },
   {
     id: "quick-add",
     icon: <Plus className="h-6 w-6" />,
+    page: "/today",
+    targetSelector: "[data-tutorial='quick-add-fab']",
     title: "Quick Add",
-    description: "See the floating button in the corner? Tap it anywhere in the app to instantly add a task without leaving what you're doing.",
-    visual: <QuickAddIllustration />,
+    description: "This button is always in the corner on every page. Tap it to instantly add a task without losing your place.",
+    cta: "Give it a tap to add your first task",
     accentColor: "#ec4899",
+    tooltipSide: "top",
   },
   {
     id: "ready",
     icon: <Zap className="h-6 w-6" />,
+    page: null,
+    targetSelector: null,
     title: "You're all set!",
-    description: "Everything you need to stay on top of school — all in one place. Start by adding a subject in Settings or pasting your first assignment.",
-    visual: <ReadyIllustration />,
+    description: "Next up: add your subjects and give them colors. StudyFlow works best when it knows your schedule.",
+    cta: null,
     accentColor: "#6366f1",
   },
 ];
+
+function clamp(v: number, lo: number, hi: number) {
+  return Math.max(lo, Math.min(hi, v));
+}
+
+function getTooltipPos(
+  sr: SpotlightRect,
+  side: "auto" | "top" | "bottom" = "auto",
+): React.CSSProperties {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const TW = 340;
+  const GAP = 18;
+
+  const spotTop = sr.y - PAD;
+  const spotBottom = sr.y + sr.h + PAD;
+  const centerX = sr.x + sr.w / 2;
+  const left = clamp(centerX - TW / 2, 12, vw - TW - 12);
+
+  const useBelow =
+    side === "bottom" ||
+    (side !== "top" && spotBottom + GAP + 220 < vh);
+
+  if (useBelow) return { top: spotBottom + GAP, left };
+  return { bottom: vh - spotTop + GAP, left };
+}
 
 export default function TutorialModal() {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
+  const [sr, setSr] = useState<SpotlightRect | null>(null);
   const [, setLocation] = useLocation();
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    const completed = localStorage.getItem(STORAGE_KEY);
-    if (!completed) {
-      const timer = setTimeout(() => setOpen(true), 800);
-      return () => clearTimeout(timer);
+    if (!localStorage.getItem(STORAGE_KEY)) {
+      const t = setTimeout(() => setOpen(true), 800);
+      return () => clearTimeout(t);
     }
   }, []);
 
-  function handleNext() {
-    if (step < STEPS.length - 1) {
-      setDirection(1);
-      setStep((s) => s + 1);
-    } else {
-      handleComplete();
-    }
-  }
+  const measure = useCallback((sel: string) => {
+    const el = document.querySelector(sel);
+    if (!el) return false;
+    const r = el.getBoundingClientRect();
+    setSr({ x: r.x, y: r.y, w: r.width, h: r.height });
+    return true;
+  }, []);
 
-  function handlePrev() {
-    if (step > 0) {
-      setDirection(-1);
-      setStep((s) => s - 1);
-    }
-  }
+  useEffect(() => {
+    if (!open) return;
+    const cur = STEPS[step];
+    if (pollRef.current) clearInterval(pollRef.current);
 
-  function handleComplete() {
+    if (!cur.targetSelector) {
+      setSr(null);
+      if (cur.page) setLocation(cur.page);
+      return;
+    }
+
+    if (cur.page) setLocation(cur.page);
+    setSr(null);
+
+    let attempts = 0;
+    pollRef.current = setInterval(() => {
+      if (measure(cur.targetSelector!)) {
+        clearInterval(pollRef.current!);
+      } else if (++attempts > 40) {
+        clearInterval(pollRef.current!);
+      }
+    }, 100);
+
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, [step, open]); // eslint-disable-line
+
+  useEffect(() => {
+    if (!open) return;
+    const sel = STEPS[step].targetSelector;
+    if (!sel) return;
+    const remeasure = () => measure(sel);
+    window.addEventListener("resize", remeasure);
+    window.addEventListener("scroll", remeasure, true);
+    return () => {
+      window.removeEventListener("resize", remeasure);
+      window.removeEventListener("scroll", remeasure, true);
+    };
+  }, [step, open, measure]);
+
+  function goNext() {
+    if (step < STEPS.length - 1) { setDirection(1); setStep(s => s + 1); }
+    else finish();
+  }
+  function goPrev() {
+    if (step > 0) { setDirection(-1); setStep(s => s - 1); }
+  }
+  function finish() {
     localStorage.setItem(STORAGE_KEY, "true");
     setOpen(false);
     setLocation("/settings");
   }
-
-  function handleClose() {
+  function skip() {
     localStorage.setItem(STORAGE_KEY, "true");
     setOpen(false);
   }
 
-  const current = STEPS[step];
+  const cur = STEPS[step];
+  const isSpotlight = !!cur.targetSelector && !!sr;
+  const isModal = !cur.targetSelector;
 
-  const slideVariants = {
-    enter: (d: number) => ({ x: d > 0 ? 60 : -60, opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: (d: number) => ({ x: d > 0 ? -60 : 60, opacity: 0 }),
-  };
+  const tipPos = sr ? getTooltipPos(sr, cur.tooltipSide) : null;
+
+  const progressDots = (
+    <div className="flex gap-1.5">
+      {STEPS.map((_, i) => (
+        <div
+          key={i}
+          className={cn(
+            "rounded-full transition-all duration-300",
+            i === step ? "w-5 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-muted-foreground/25",
+          )}
+        />
+      ))}
+    </div>
+  );
+
+  const navButtons = (small = false) => (
+    <div className={cn("flex gap-1.5", small ? "" : "")}>
+      <Button
+        variant="ghost"
+        size={small ? "sm" : "sm"}
+        className={cn("gap-1", small && "h-7 px-2 text-xs")}
+        onClick={goPrev}
+        disabled={step === 0}
+      >
+        <ChevronLeft className={small ? "h-3.5 w-3.5" : "h-4 w-4"} />
+        Back
+      </Button>
+      <Button
+        size={small ? "sm" : "sm"}
+        className={cn("gap-1 text-white", small && "h-7 px-3 text-xs")}
+        style={{ background: cur.accentColor }}
+        onClick={goNext}
+      >
+        {step === STEPS.length - 1 ? "Let's go!" : "Next"}
+        <ChevronRight className={small ? "h-3.5 w-3.5" : "h-4 w-4"} />
+      </Button>
+    </div>
+  );
 
   return (
     <AnimatePresence>
       {open && (
         <>
-          {/* Backdrop */}
-          <motion.div
-            key="backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
-            onClick={handleClose}
-          />
-
-          {/* Modal */}
-          <motion.div
-            key="modal"
-            initial={{ opacity: 0, scale: 0.92, y: 24 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 24 }}
-            transition={{ type: "spring", stiffness: 320, damping: 28 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
-          >
-            <div
-              className="pointer-events-auto w-full max-w-md bg-background rounded-2xl shadow-2xl border border-border flex flex-col overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between px-5 pt-5 pb-0">
-                <div className="flex gap-1.5">
-                  {STEPS.map((s, i) => (
-                    <button
-                      key={s.id}
-                      onClick={() => { setDirection(i > step ? 1 : -1); setStep(i); }}
-                      className={cn(
-                        "h-1.5 rounded-full transition-all duration-300",
-                        i === step ? "w-6 bg-primary" : "w-1.5 bg-muted hover:bg-muted-foreground/30"
-                      )}
-                      aria-label={`Go to step ${i + 1}`}
-                    />
-                  ))}
-                </div>
-                <button
-                  onClick={handleClose}
-                  className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                  aria-label="Skip tutorial"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              {/* Icon + step label */}
-              <div className="px-5 pt-4 pb-2 flex items-center gap-3">
+          {/* ── SPOTLIGHT MODE ── */}
+          {isSpotlight && sr && tipPos && (() => {
+            const sx = sr.x - PAD;
+            const sy = sr.y - PAD;
+            const sw = sr.w + PAD * 2;
+            const sh = sr.h + PAD * 2;
+            return (
+              <>
+                {/* Four overlay pieces — leave the spotlight area clear so it's interactive */}
+                {/* Top */}
                 <motion.div
-                  key={`icon-${current.id}`}
-                  initial={{ scale: 0.6, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: `${current.accentColor}15`, color: current.accentColor }}
-                >
-                  {current.icon}
-                </motion.div>
-                <div>
-                  <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-widest">
-                    Step {step + 1} of {STEPS.length}
-                  </p>
-                </div>
-              </div>
+                  className="fixed inset-x-0 top-0 z-40 bg-black/60 pointer-events-auto"
+                  animate={{ height: Math.max(0, sy) }}
+                  transition={{ duration: 0.28, ease: "easeInOut" }}
+                />
+                {/* Bottom */}
+                <motion.div
+                  className="fixed inset-x-0 bottom-0 z-40 bg-black/60 pointer-events-auto"
+                  animate={{ top: sy + sh }}
+                  transition={{ duration: 0.28, ease: "easeInOut" }}
+                />
+                {/* Left */}
+                <motion.div
+                  className="fixed left-0 z-40 bg-black/60 pointer-events-auto"
+                  animate={{ top: sy, height: sh, width: Math.max(0, sx) }}
+                  transition={{ duration: 0.28, ease: "easeInOut" }}
+                />
+                {/* Right */}
+                <motion.div
+                  className="fixed right-0 z-40 bg-black/60 pointer-events-auto"
+                  animate={{ top: sy, height: sh, left: sx + sw }}
+                  transition={{ duration: 0.28, ease: "easeInOut" }}
+                />
 
-              {/* Content (animated) */}
-              <div className="relative overflow-hidden px-5">
-                <AnimatePresence mode="wait" custom={direction}>
+                {/* Glowing border ring around spotlight */}
+                <motion.div
+                  className="fixed z-40 rounded-xl pointer-events-none"
+                  animate={{ left: sx, top: sy, width: sw, height: sh }}
+                  transition={{ duration: 0.28, ease: "easeInOut" }}
+                  style={{
+                    border: `2px solid ${cur.accentColor}`,
+                    boxShadow: `0 0 0 3px ${cur.accentColor}25, 0 0 24px ${cur.accentColor}50`,
+                  }}
+                />
+
+                {/* Tooltip card */}
+                <AnimatePresence mode="wait">
                   <motion.div
-                    key={current.id}
-                    custom={direction}
-                    variants={slideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={{ duration: 0.22, ease: "easeInOut" }}
-                    className="space-y-3"
+                    key={cur.id}
+                    initial={{ opacity: 0, y: 10, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.96 }}
+                    transition={{ duration: 0.18, ease: "easeOut" }}
+                    className="fixed z-50 w-[340px] bg-background rounded-2xl border border-border shadow-2xl overflow-hidden"
+                    style={tipPos}
                   >
-                    <h2 className="text-xl font-bold tracking-tight leading-snug">
-                      {current.title}
-                    </h2>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {current.description}
-                    </p>
-                    <div className="pt-1 pb-2">
-                      {current.visual}
+                    {/* Accent top bar */}
+                    <div className="h-1" style={{ background: cur.accentColor }} />
+
+                    <div className="p-4 space-y-3">
+                      {/* Header row */}
+                      <div className="flex items-start gap-2 justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className="h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                            style={{ background: `${cur.accentColor}18`, color: cur.accentColor }}
+                          >
+                            {cur.icon}
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest leading-none mb-0.5">
+                              Step {step + 1} of {STEPS.length}
+                            </p>
+                            <h3 className="text-sm font-bold leading-tight">{cur.title}</h3>
+                          </div>
+                        </div>
+                        <button
+                          onClick={skip}
+                          className="h-6 w-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0 mt-0.5"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {cur.description}
+                      </p>
+
+                      {cur.cta && (
+                        <div
+                          className="flex items-start gap-2 rounded-lg px-3 py-2 text-xs font-medium"
+                          style={{ background: `${cur.accentColor}12`, color: cur.accentColor }}
+                        >
+                          <ChevronRight className="h-3.5 w-3.5 mt-px flex-shrink-0" />
+                          <span>{cur.cta}</span>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between pt-0.5">
+                        {progressDots}
+                        {navButtons(true)}
+                      </div>
                     </div>
                   </motion.div>
                 </AnimatePresence>
-              </div>
+              </>
+            );
+          })()}
 
-              {/* Footer */}
-              <div className="px-5 pb-5 pt-2 flex items-center justify-between gap-3 border-t border-border mt-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handlePrev}
-                  disabled={step === 0}
-                  className="gap-1"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Back
-                </Button>
+          {/* Loading state: navigating to page, waiting for element */}
+          {cur.targetSelector && !sr && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="fixed inset-0 z-40 bg-black/55 pointer-events-auto"
+            />
+          )}
 
-                <button
-                  onClick={handleClose}
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          {/* ── CENTERED MODAL MODE ── for steps without a spotlight target */}
+          {isModal && (
+            <>
+              <motion.div
+                key="modal-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm pointer-events-auto"
+                onClick={skip}
+              />
+              <motion.div
+                key="modal-card"
+                initial={{ opacity: 0, scale: 0.9, y: 24 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 24 }}
+                transition={{ type: "spring", stiffness: 320, damping: 26 }}
+                className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
+              >
+                <div
+                  className="pointer-events-auto w-full max-w-sm bg-background rounded-2xl shadow-2xl border border-border overflow-hidden"
+                  onClick={e => e.stopPropagation()}
                 >
-                  Skip tutorial
-                </button>
+                  <div className="h-1" style={{ background: cur.accentColor }} />
 
-                <Button
-                  size="sm"
-                  onClick={handleNext}
-                  className="gap-1"
-                  style={{ background: current.accentColor }}
-                >
-                  {step === STEPS.length - 1 ? "Let's go!" : "Next"}
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </motion.div>
+                  <div className="p-6 space-y-5">
+                    {/* Progress + close */}
+                    <div className="flex items-center justify-between">
+                      {progressDots}
+                      <button
+                        onClick={skip}
+                        className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    {/* Icon */}
+                    <motion.div
+                      initial={{ scale: 0.5, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 22 }}
+                      className="h-20 w-20 rounded-2xl flex items-center justify-center mx-auto"
+                      style={{ background: `${cur.accentColor}15`, color: cur.accentColor }}
+                    >
+                      {step === 0
+                        ? <span className="text-4xl font-extrabold" style={{ color: cur.accentColor }}>SF</span>
+                        : <div className="scale-[1.6]">{cur.icon}</div>
+                      }
+                    </motion.div>
+
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={cur.id}
+                        initial={{ opacity: 0, x: direction > 0 ? 20 : -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: direction > 0 ? -20 : 20 }}
+                        transition={{ duration: 0.2 }}
+                        className="text-center space-y-2"
+                      >
+                        <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-widest">
+                          Step {step + 1} of {STEPS.length}
+                        </p>
+                        <h2 className="text-xl font-bold tracking-tight">{cur.title}</h2>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{cur.description}</p>
+                      </motion.div>
+                    </AnimatePresence>
+
+                    <div className="flex items-center justify-between pt-1">
+                      <Button variant="ghost" size="sm" onClick={goPrev} disabled={step === 0} className="gap-1">
+                        <ChevronLeft className="h-4 w-4" />
+                        Back
+                      </Button>
+                      <button onClick={skip} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                        Skip tutorial
+                      </button>
+                      <Button size="sm" onClick={goNext} className="gap-1 text-white" style={{ background: cur.accentColor }}>
+                        {step === STEPS.length - 1 ? "Let's go!" : "Next"}
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </>
+          )}
         </>
       )}
     </AnimatePresence>

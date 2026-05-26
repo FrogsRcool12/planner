@@ -130,6 +130,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* FAB */}
       <Button 
+        data-tutorial="quick-add-fab"
         className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg"
         size="icon"
         onClick={() => setQuickAddOpen(true)}

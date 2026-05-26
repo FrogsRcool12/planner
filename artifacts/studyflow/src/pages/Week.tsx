@@ -58,7 +58,7 @@ export default function Week() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       ) : (
-        <div className="flex-1 bg-card rounded-xl border border-border shadow-sm overflow-x-auto">
+        <div data-tutorial="week-grid" className="flex-1 bg-card rounded-xl border border-border shadow-sm overflow-x-auto">
           <div className="min-w-[1000px] h-full flex flex-col">
             {/* Header Row */}
             <div className="grid grid-cols-[80px_repeat(7,1fr)] border-b border-border bg-muted/30">
