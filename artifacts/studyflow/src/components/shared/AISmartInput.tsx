@@ -89,7 +89,7 @@ export default function AISmartInput({ subjects }: { subjects: Subject[] }) {
   };
 
   return (
-    <div className="bg-card rounded-xl border border-primary/20 shadow-md shadow-primary/5 overflow-hidden transition-all duration-300">
+    <div data-tutorial="ai-input" className="bg-card rounded-xl border border-primary/20 shadow-md shadow-primary/5 overflow-hidden transition-all duration-300">
       {!parsedResults ? (
         <div className="p-4 relative">
           <div className="absolute top-6 left-6 text-primary">

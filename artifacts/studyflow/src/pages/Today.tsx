@@ -28,7 +28,7 @@ export default function Today() {
         <p className="text-muted-foreground">Let's see what you need to get done.</p>
       </header>
       
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div data-tutorial="today-overview" className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-card border border-border rounded-xl p-4 shadow-sm flex flex-col gap-2">
           <div className="flex items-center gap-2 text-muted-foreground font-medium">
             <CheckCircle className="h-5 w-5 text-emerald-500" />
@@ -86,7 +86,7 @@ export default function Today() {
             </section>
           )}
 
-          <section className="space-y-4">
+          <section data-tutorial="today-assignments" className="space-y-4">
             <h2 className="text-xl font-bold">Today's Schedule</h2>
             {summary?.todayAssignments && summary.todayAssignments.length > 0 ? (
               <div className="space-y-3">
