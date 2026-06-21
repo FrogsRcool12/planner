@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { ThemeProvider } from "next-themes";
 import { ClerkProvider, SignIn, SignUp, RedirectToSignIn, useClerk, useAuth } from "@clerk/react";
 import { publishableKeyFromHost } from "@clerk/react/internal";
 import { Switch, Route, useLocation, Router as WouterRouter, Redirect } from "wouter";
@@ -158,9 +159,11 @@ function ClerkProviderWithRoutes() {
 
 function App() {
   return (
-    <WouterRouter base={basePath}>
-      <ClerkProviderWithRoutes />
-    </WouterRouter>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <WouterRouter base={basePath}>
+        <ClerkProviderWithRoutes />
+      </WouterRouter>
+    </ThemeProvider>
   );
 }
 
