@@ -172,6 +172,24 @@ export default function Settings() {
     });
   };
 
+  const [clearingAll, setClearingAll] = useState(false);
+
+  const handleClearAll = async () => {
+    if (!ordered.length) return;
+    if (!confirm(`Remove all ${ordered.length} subjects? Your assignments won't be deleted, just unlinked from subjects.`)) return;
+    setClearingAll(true);
+    await Promise.all(
+      ordered.map(s =>
+        new Promise<void>(resolve =>
+          deleteSubject.mutate({ id: s.id }, { onSettled: () => resolve() })
+        )
+      )
+    );
+    queryClient.invalidateQueries({ queryKey: getListSubjectsQueryKey() });
+    toast({ title: "All subjects cleared" });
+    setClearingAll(false);
+  };
+
   return (
     <div className="space-y-10 max-w-4xl mx-auto h-full flex flex-col pb-20">
       <header>
@@ -280,7 +298,19 @@ export default function Settings() {
             </div>
           ) : ordered.length ? (
             <>
-              <p className="text-xs text-muted-foreground pb-1">Drag to reorder — period numbers update automatically.</p>
+              <div className="flex items-center justify-between pb-1">
+                <p className="text-xs text-muted-foreground">Drag to reorder — period numbers update automatically.</p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10 h-7 px-2"
+                  onClick={handleClearAll}
+                  disabled={clearingAll}
+                >
+                  {clearingAll ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Trash2 className="h-3.5 w-3.5 mr-1" />}
+                  Clear All
+                </Button>
+              </div>
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={ordered.map(s => s.id)} strategy={verticalListSortingStrategy}>
                   <div className="space-y-2">
