@@ -7,15 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Assignment } from "@workspace/api-client-react/src/generated/api.schemas";
 
-type SortKey = "due-asc" | "due-desc" | "created-desc" | "created-asc" | "priority-desc" | "priority-asc";
+type SortKey = "due-asc" | "due-desc" | "created-desc" | "created-asc" | "priority-desc" | "priority-asc" | "duration-desc" | "duration-asc";
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
-  { value: "due-asc",       label: "Earliest due"      },
-  { value: "due-desc",      label: "Latest due"        },
-  { value: "created-desc",  label: "Recently added"    },
-  { value: "created-asc",   label: "Oldest first"      },
-  { value: "priority-desc", label: "Highest priority"  },
-  { value: "priority-asc",  label: "Lowest priority"   },
+  { value: "due-asc",       label: "Earliest due"       },
+  { value: "due-desc",      label: "Latest due"         },
+  { value: "created-desc",  label: "Recently added"     },
+  { value: "created-asc",   label: "Oldest first"       },
+  { value: "priority-desc", label: "Highest priority"   },
+  { value: "priority-asc",  label: "Lowest priority"    },
+  { value: "duration-desc", label: "Longest duration"   },
+  { value: "duration-asc",  label: "Shortest duration"  },
 ];
 
 function sortAssignments(list: Assignment[], key: SortKey): Assignment[] {
@@ -39,6 +41,10 @@ function sortAssignments(list: Assignment[], key: SortKey): Assignment[] {
         return (b.priority ?? 0) - (a.priority ?? 0);
       case "priority-asc":
         return (a.priority ?? 0) - (b.priority ?? 0);
+      case "duration-desc":
+        return (b.workloadMinutes ?? 0) - (a.workloadMinutes ?? 0);
+      case "duration-asc":
+        return (a.workloadMinutes ?? 0) - (b.workloadMinutes ?? 0);
     }
   });
 }
