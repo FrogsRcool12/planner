@@ -83,6 +83,19 @@ export const AssignmentUrgency = {
   high: 'high',
 } as const;
 
+/**
+ * @nullable
+ */
+export type AssignmentRecurringInterval = typeof AssignmentRecurringInterval[keyof typeof AssignmentRecurringInterval] | null;
+
+
+export const AssignmentRecurringInterval = {
+  daily: 'daily',
+  weekly: 'weekly',
+  biweekly: 'biweekly',
+  monthly: 'monthly',
+} as const;
+
 export interface Assignment {
   id: number;
   title: string;
@@ -114,6 +127,8 @@ export interface Assignment {
   aiGenerated: boolean;
   /** @nullable */
   notes: string | null;
+  /** @nullable */
+  recurringInterval: AssignmentRecurringInterval;
   createdAt: string;
 }
 
@@ -164,6 +179,19 @@ export const AssignmentInputUrgency = {
   high: 'high',
 } as const;
 
+/**
+ * @nullable
+ */
+export type AssignmentInputRecurringInterval = typeof AssignmentInputRecurringInterval[keyof typeof AssignmentInputRecurringInterval] | null;
+
+
+export const AssignmentInputRecurringInterval = {
+  daily: 'daily',
+  weekly: 'weekly',
+  biweekly: 'biweekly',
+  monthly: 'monthly',
+} as const;
+
 export interface AssignmentInput {
   title: string;
   description?: string;
@@ -189,6 +217,8 @@ export interface AssignmentInput {
   /** @nullable */
   notes?: string | null;
   aiGenerated?: boolean;
+  /** @nullable */
+  recurringInterval?: AssignmentInputRecurringInterval;
 }
 
 export type AssignmentUpdateTaskType = typeof AssignmentUpdateTaskType[keyof typeof AssignmentUpdateTaskType];

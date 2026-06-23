@@ -100,6 +100,7 @@ export const ListAssignmentsResponseItem = zod.object({
   "urgency": zod.union([zod.literal('low'),zod.literal('medium'),zod.literal('high'),zod.literal(null)]).nullable(),
   "aiGenerated": zod.boolean(),
   "notes": zod.string().nullable(),
+  "recurringInterval": zod.union([zod.literal('daily'),zod.literal('weekly'),zod.literal('biweekly'),zod.literal('monthly'),zod.literal(null)]).nullable(),
   "createdAt": zod.coerce.date()
 })
 export const ListAssignmentsResponse = zod.array(ListAssignmentsResponseItem)
@@ -125,7 +126,8 @@ export const CreateAssignmentBody = zod.object({
   "difficulty": zod.union([zod.literal('easy'),zod.literal('medium'),zod.literal('hard'),zod.literal(null)]).nullish(),
   "urgency": zod.union([zod.literal('low'),zod.literal('medium'),zod.literal('high'),zod.literal(null)]).nullish(),
   "notes": zod.string().nullish(),
-  "aiGenerated": zod.boolean().optional()
+  "aiGenerated": zod.boolean().optional(),
+  "recurringInterval": zod.union([zod.literal('daily'),zod.literal('weekly'),zod.literal('biweekly'),zod.literal('monthly'),zod.literal(null)]).nullish()
 })
 
 
@@ -157,6 +159,7 @@ export const GetAssignmentResponse = zod.object({
   "urgency": zod.union([zod.literal('low'),zod.literal('medium'),zod.literal('high'),zod.literal(null)]).nullable(),
   "aiGenerated": zod.boolean(),
   "notes": zod.string().nullable(),
+  "recurringInterval": zod.union([zod.literal('daily'),zod.literal('weekly'),zod.literal('biweekly'),zod.literal('monthly'),zod.literal(null)]).nullable(),
   "createdAt": zod.coerce.date()
 })
 
@@ -208,6 +211,7 @@ export const UpdateAssignmentResponse = zod.object({
   "urgency": zod.union([zod.literal('low'),zod.literal('medium'),zod.literal('high'),zod.literal(null)]).nullable(),
   "aiGenerated": zod.boolean(),
   "notes": zod.string().nullable(),
+  "recurringInterval": zod.union([zod.literal('daily'),zod.literal('weekly'),zod.literal('biweekly'),zod.literal('monthly'),zod.literal(null)]).nullable(),
   "createdAt": zod.coerce.date()
 })
 
@@ -408,6 +412,7 @@ export const GetDashboardSummaryResponse = zod.object({
   "urgency": zod.union([zod.literal('low'),zod.literal('medium'),zod.literal('high'),zod.literal(null)]).nullable(),
   "aiGenerated": zod.boolean(),
   "notes": zod.string().nullable(),
+  "recurringInterval": zod.union([zod.literal('daily'),zod.literal('weekly'),zod.literal('biweekly'),zod.literal('monthly'),zod.literal(null)]).nullable(),
   "createdAt": zod.coerce.date()
 })),
   "overdueAssignments": zod.array(zod.object({
@@ -427,6 +432,7 @@ export const GetDashboardSummaryResponse = zod.object({
   "urgency": zod.union([zod.literal('low'),zod.literal('medium'),zod.literal('high'),zod.literal(null)]).nullable(),
   "aiGenerated": zod.boolean(),
   "notes": zod.string().nullable(),
+  "recurringInterval": zod.union([zod.literal('daily'),zod.literal('weekly'),zod.literal('biweekly'),zod.literal('monthly'),zod.literal(null)]).nullable(),
   "createdAt": zod.coerce.date()
 })),
   "upcomingTests": zod.array(zod.object({
@@ -446,6 +452,7 @@ export const GetDashboardSummaryResponse = zod.object({
   "urgency": zod.union([zod.literal('low'),zod.literal('medium'),zod.literal('high'),zod.literal(null)]).nullable(),
   "aiGenerated": zod.boolean(),
   "notes": zod.string().nullable(),
+  "recurringInterval": zod.union([zod.literal('daily'),zod.literal('weekly'),zod.literal('biweekly'),zod.literal('monthly'),zod.literal(null)]).nullable(),
   "createdAt": zod.coerce.date()
 })),
   "totalWorkloadMinutesToday": zod.number(),
@@ -494,6 +501,7 @@ export const GetWeeklyViewResponse = zod.object({
   "urgency": zod.union([zod.literal('low'),zod.literal('medium'),zod.literal('high'),zod.literal(null)]).nullable(),
   "aiGenerated": zod.boolean(),
   "notes": zod.string().nullable(),
+  "recurringInterval": zod.union([zod.literal('daily'),zod.literal('weekly'),zod.literal('biweekly'),zod.literal('monthly'),zod.literal(null)]).nullable(),
   "createdAt": zod.coerce.date()
 })),
   "notes": zod.array(zod.object({

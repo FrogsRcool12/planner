@@ -34,6 +34,7 @@ function formatAssignment(
     urgency: a.urgency ?? null,
     aiGenerated: a.aiGenerated,
     notes: a.notes ?? null,
+    recurringInterval: a.recurringInterval ?? null,
     createdAt: a.createdAt.toISOString(),
   };
 }
@@ -119,6 +120,41 @@ router.patch("/:id", async (req, res) => {
       const [s] = await db.select().from(subjects).where(eq(subjects.id, row.subjectId));
       subject = s ?? null;
     }
+
+    // Auto-create next recurring occurrence when a task is completed/submitted
+    const newStatus = body.data.status;
+    if (
+      row.recurringInterval &&
+      (newStatus === "completed" || newStatus === "submitted") &&
+      row.dueDate
+    ) {
+      const nextDate = new Date(row.dueDate);
+      switch (row.recurringInterval) {
+        case "daily":    nextDate.setDate(nextDate.getDate() + 1);  break;
+        case "weekly":   nextDate.setDate(nextDate.getDate() + 7);  break;
+        case "biweekly": nextDate.setDate(nextDate.getDate() + 14); break;
+        case "monthly":  nextDate.setMonth(nextDate.getMonth() + 1); break;
+      }
+      const nextDueDate = nextDate.toISOString().split("T")[0];
+      await db.insert(assignments).values({
+        title: row.title,
+        description: row.description,
+        subjectId: row.subjectId,
+        dueDate: nextDueDate,
+        period: row.period,
+        taskType: row.taskType,
+        status: "notStarted",
+        priority: row.priority,
+        workloadMinutes: row.workloadMinutes,
+        difficulty: row.difficulty,
+        urgency: row.urgency,
+        aiGenerated: false,
+        notes: row.notes,
+        recurringInterval: row.recurringInterval,
+        userId: row.userId,
+      });
+    }
+
     res.json(formatAssignment(row, subject));
   } catch (err) {
     req.log.error({ err }, "updateAssignment error");

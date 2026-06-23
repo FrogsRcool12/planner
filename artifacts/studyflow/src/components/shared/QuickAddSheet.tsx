@@ -8,7 +8,7 @@ import { useCreateAssignment, useListSubjects } from "@workspace/api-client-reac
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { AssignmentInputTaskType, AssignmentInputStatus } from "@workspace/api-client-react/src/generated/api.schemas";
+import { AssignmentInputTaskType, AssignmentInputStatus, AssignmentInputRecurringInterval } from "@workspace/api-client-react/src/generated/api.schemas";
 
 export default function QuickAddSheet({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
   const [title, setTitle] = useState("");
@@ -17,6 +17,7 @@ export default function QuickAddSheet({ open, onOpenChange }: { open: boolean, o
   const [period, setPeriod] = useState<string>("none");
   const [taskType, setTaskType] = useState<AssignmentInputTaskType>("assignment");
   const [priority, setPriority] = useState(3);
+  const [recurringInterval, setRecurringInterval] = useState<string>("none");
   
   const { data: subjects } = useListSubjects();
   const createMutation = useCreateAssignment();
@@ -36,6 +37,7 @@ export default function QuickAddSheet({ open, onOpenChange }: { open: boolean, o
         taskType,
         status: "notStarted",
         priority,
+        recurringInterval: recurringInterval !== "none" ? recurringInterval as AssignmentInputRecurringInterval : undefined,
       }
     }, {
       onSuccess: () => {
@@ -46,6 +48,7 @@ export default function QuickAddSheet({ open, onOpenChange }: { open: boolean, o
         setDueDate("");
         setPeriod("none");
         setPriority(3);
+        setRecurringInterval("none");
         onOpenChange(false);
       },
       onError: () => {
@@ -140,6 +143,22 @@ export default function QuickAddSheet({ open, onOpenChange }: { open: boolean, o
             </div>
           </div>
           
+          <div className="space-y-2">
+            <Label>Repeat</Label>
+            <Select value={recurringInterval} onValueChange={setRecurringInterval}>
+              <SelectTrigger>
+                <SelectValue placeholder="Does not repeat" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Does not repeat</SelectItem>
+                <SelectItem value="daily">Daily</SelectItem>
+                <SelectItem value="weekly">Weekly</SelectItem>
+                <SelectItem value="biweekly">Every 2 weeks</SelectItem>
+                <SelectItem value="monthly">Monthly</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <Button type="submit" className="w-full" disabled={createMutation.isPending || !title}>
             {createMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
             Add Task

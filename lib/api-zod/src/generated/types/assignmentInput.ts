@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { AssignmentInputDifficulty } from './assignmentInputDifficulty';
+import type { AssignmentInputRecurringInterval } from './assignmentInputRecurringInterval';
 import type { AssignmentInputStatus } from './assignmentInputStatus';
 import type { AssignmentInputTaskType } from './assignmentInputTaskType';
 import type { AssignmentInputUrgency } from './assignmentInputUrgency';
@@ -35,4 +36,6 @@ export interface AssignmentInput {
   /** @nullable */
   notes?: string | null;
   aiGenerated?: boolean;
+  /** @nullable */
+  recurringInterval?: AssignmentInputRecurringInterval;
 }
