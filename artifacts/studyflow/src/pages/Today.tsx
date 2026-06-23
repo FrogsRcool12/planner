@@ -1,8 +1,8 @@
-import { useGetDashboardSummary, useListAssignments, useListSubjects } from "@workspace/api-client-react";
-import { getGetDashboardSummaryQueryKey, getListAssignmentsQueryKey } from "@workspace/api-client-react";
+import { useGetDashboardSummary, useListSubjects } from "@workspace/api-client-react";
+import { getGetDashboardSummaryQueryKey } from "@workspace/api-client-react";
 import AISmartInput from "@/components/shared/AISmartInput";
 import AssignmentCard from "@/components/shared/AssignmentCard";
-import { Loader2, AlertTriangle, Calendar, Clock, CheckCircle, Sparkles, TrendingUp, ListChecks, Timer } from "lucide-react";
+import { Loader2, AlertTriangle, Calendar, Clock, CheckCircle, Sparkles } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 export default function Today() {
@@ -10,27 +10,6 @@ export default function Today() {
     query: { queryKey: getGetDashboardSummaryQueryKey() }
   });
   const { data: subjects } = useListSubjects();
-  const { data: allAssignments } = useListAssignments({}, { query: { queryKey: getListAssignmentsQueryKey({}) } });
-
-  const totalAll       = allAssignments?.length ?? 0;
-  const totalDone      = allAssignments?.filter(a => a.status === "completed" || a.status === "submitted").length ?? 0;
-  const totalInProgress = allAssignments?.filter(a => a.status === "inProgress").length ?? 0;
-  const completionRate = totalAll > 0 ? Math.round((totalDone / totalAll) * 100) : 0;
-
-  // Compute this week's stats
-  const weekStart = (() => {
-    const d = new Date(); d.setDate(d.getDate() - d.getDay()); return d.toISOString().split("T")[0];
-  })();
-  const weekEnd = (() => {
-    const d = new Date(); d.setDate(d.getDate() - d.getDay() + 6); return d.toISOString().split("T")[0];
-  })();
-  const thisWeekDone = allAssignments?.filter(a =>
-    (a.status === "completed" || a.status === "submitted") &&
-    a.dueDate && a.dueDate >= weekStart && a.dueDate <= weekEnd
-  ).length ?? 0;
-  const thisWeekTotal = allAssignments?.filter(a =>
-    a.dueDate && a.dueDate >= weekStart && a.dueDate <= weekEnd
-  ).length ?? 0;
 
   if (isLoading) {
     return (
@@ -88,40 +67,6 @@ export default function Today() {
           </div>
           <Progress value={completedRatio || 0} className="h-2" />
         </div>
-      )}
-
-      {/* Overall progress stats */}
-      {totalAll > 0 && (
-        <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="rounded-xl border border-border bg-card p-3 shadow-sm flex flex-col gap-1">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
-              <TrendingUp className="h-3.5 w-3.5 text-primary" /> Completion Rate
-            </div>
-            <span className="text-2xl font-bold">{completionRate}%</span>
-            <Progress value={completionRate} className="h-1 mt-1" />
-          </div>
-          <div className="rounded-xl border border-border bg-card p-3 shadow-sm flex flex-col gap-1">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
-              <CheckCircle className="h-3.5 w-3.5 text-emerald-500" /> All-time Done
-            </div>
-            <span className="text-2xl font-bold">{totalDone}</span>
-            <span className="text-xs text-muted-foreground">of {totalAll} tasks</span>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-3 shadow-sm flex flex-col gap-1">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
-              <Timer className="h-3.5 w-3.5 text-blue-500" /> In Progress
-            </div>
-            <span className="text-2xl font-bold">{totalInProgress}</span>
-            <span className="text-xs text-muted-foreground">active tasks</span>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-3 shadow-sm flex flex-col gap-1">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
-              <ListChecks className="h-3.5 w-3.5 text-yellow-500" /> This Week
-            </div>
-            <span className="text-2xl font-bold">{thisWeekDone}/{thisWeekTotal}</span>
-            <span className="text-xs text-muted-foreground">tasks complete</span>
-          </div>
-        </section>
       )}
 
       <AISmartInput subjects={subjects || []} />

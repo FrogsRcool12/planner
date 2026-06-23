@@ -17,6 +17,7 @@ import Today from "@/pages/Today";
 import Tasks from "@/pages/Tasks";
 import Notes from "@/pages/Notes";
 import Settings from "@/pages/Settings";
+import Stats from "@/pages/Stats";
 import NotFound from "@/pages/not-found";
 
 const clerkPubKey = publishableKeyFromHost(
@@ -150,6 +151,9 @@ function ClerkProviderWithRoutes() {
             </Route>
             <Route path="/settings">
               <AppLayout><Settings /></AppLayout>
+            </Route>
+            <Route path="/stats">
+              <AppLayout><Stats /></AppLayout>
             </Route>
 
             <Route component={NotFound} />

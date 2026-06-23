@@ -1,6 +1,6 @@
 import { useAuth, useUser, RedirectToSignIn } from "@clerk/react";
 import { useLocation, Link } from "wouter";
-import { CalendarDays, Calendar, CheckSquare, Settings as SettingsIcon, BookOpen, LayoutDashboard, Menu, X, Plus } from "lucide-react";
+import { CalendarDays, Calendar, CheckSquare, Settings as SettingsIcon, BookOpen, LayoutDashboard, Menu, X, Plus, BarChart2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -32,6 +32,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     { name: "Calendar", href: "/calendar", icon: CalendarDays },
     { name: "Tasks",    href: "/tasks",    icon: CheckSquare },
     { name: "Notes",    href: "/notes",    icon: BookOpen },
+    { name: "Stats",    href: "/stats",    icon: BarChart2 },
     { name: "Settings", href: "/settings", icon: SettingsIcon },
   ];
 
