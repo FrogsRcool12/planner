@@ -10,7 +10,7 @@ import { Assignment } from "@workspace/api-client-react/src/generated/api.schema
 type SortKey = "due-asc" | "due-desc" | "created-desc" | "created-asc" | "priority-desc" | "priority-asc";
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
-  { value: "due-asc",       label: "Soonest due"       },
+  { value: "due-asc",       label: "Earliest due"      },
   { value: "due-desc",      label: "Latest due"        },
   { value: "created-desc",  label: "Recently added"    },
   { value: "created-asc",   label: "Oldest first"      },
