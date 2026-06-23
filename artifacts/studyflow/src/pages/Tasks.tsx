@@ -10,12 +10,12 @@ import { Assignment } from "@workspace/api-client-react/src/generated/api.schema
 type SortKey = "due-asc" | "due-desc" | "created-desc" | "created-asc" | "priority-desc" | "priority-asc";
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
-  { value: "due-asc",       label: "Due: Soonest first"  },
-  { value: "due-desc",      label: "Due: Latest first"   },
-  { value: "created-desc",  label: "Newest added"        },
-  { value: "created-asc",   label: "Oldest added"        },
-  { value: "priority-desc", label: "Priority: High → Low" },
-  { value: "priority-asc",  label: "Priority: Low → High" },
+  { value: "due-asc",       label: "Soonest due"       },
+  { value: "due-desc",      label: "Latest due"        },
+  { value: "created-desc",  label: "Recently added"    },
+  { value: "created-asc",   label: "Oldest first"      },
+  { value: "priority-desc", label: "Highest priority"  },
+  { value: "priority-asc",  label: "Lowest priority"   },
 ];
 
 function sortAssignments(list: Assignment[], key: SortKey): Assignment[] {
