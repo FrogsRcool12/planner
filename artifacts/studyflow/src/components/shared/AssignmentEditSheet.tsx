@@ -2,11 +2,11 @@ import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useUpdateAssignment } from "@workspace/api-client-react";
+import { useUpdateAssignment, useDeleteAssignment } from "@workspace/api-client-react";
 import { Assignment } from "@workspace/api-client-react/src/generated/api.schemas";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Circle, PlayCircle, CheckCircle2, Send } from "lucide-react";
+import { Loader2, Circle, PlayCircle, CheckCircle2, Send, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const STATUSES = [
@@ -32,6 +32,7 @@ export default function AssignmentEditSheet({
   const [hovered, setHovered] = useState(0);
 
   const updateMutation = useUpdateAssignment();
+  const deleteMutation = useDeleteAssignment();
   const { toast } = useToast();
 
   const isDirty = status !== assignment.status || priority !== assignment.priority;
@@ -46,6 +47,21 @@ export default function AssignmentEditSheet({
           onOpenChange(false);
         },
         onError: () => toast({ title: "Failed to update task", variant: "destructive" }),
+      },
+    );
+  }
+
+  function handleDelete() {
+    if (!confirm(`Delete "${assignment.title}"? This can't be undone.`)) return;
+    deleteMutation.mutate(
+      { id: assignment.id },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries();
+          toast({ title: "Task deleted" });
+          onOpenChange(false);
+        },
+        onError: () => toast({ title: "Failed to delete task", variant: "destructive" }),
       },
     );
   }
@@ -165,10 +181,22 @@ export default function AssignmentEditSheet({
           <Button
             className="w-full"
             onClick={handleSave}
-            disabled={updateMutation.isPending || !isDirty}
+            disabled={updateMutation.isPending || deleteMutation.isPending || !isDirty}
           >
             {updateMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Save Changes
+          </Button>
+
+          <Button
+            variant="ghost"
+            className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={handleDelete}
+            disabled={deleteMutation.isPending || updateMutation.isPending}
+          >
+            {deleteMutation.isPending
+              ? <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              : <Trash2 className="h-4 w-4 mr-2" />}
+            Delete Task
           </Button>
         </div>
       </SheetContent>
