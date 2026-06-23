@@ -1,14 +1,18 @@
 import { useState } from "react";
-import { useListAssignments, useSortTasksWithAI } from "@workspace/api-client-react";
+import { useListAssignments, useListSubjects, useSortTasksWithAI } from "@workspace/api-client-react";
 import { getListAssignmentsQueryKey } from "@workspace/api-client-react";
 import AssignmentCard from "@/components/shared/AssignmentCard";
-import { Loader2, Search, Sparkles } from "lucide-react";
+import QuickAddSheet from "@/components/shared/QuickAddSheet";
+import { Loader2, Search, Sparkles, Plus, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Assignment } from "@workspace/api-client-react/src/generated/api.schemas";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 type SortKey = "due-asc" | "due-desc" | "created-desc" | "created-asc" | "priority-desc" | "priority-asc" | "duration-desc" | "duration-asc" | "ai";
+type StatusFilter = "all" | "notStarted" | "inProgress" | "completed" | "submitted";
 
 const SORT_OPTIONS: { value: SortKey; label: string; ai?: boolean }[] = [
   { value: "due-asc",       label: "Earliest due"      },
@@ -20,6 +24,14 @@ const SORT_OPTIONS: { value: SortKey; label: string; ai?: boolean }[] = [
   { value: "duration-desc", label: "Longest duration"  },
   { value: "duration-asc",  label: "Shortest duration" },
   { value: "ai",            label: "AI Recommended",   ai: true },
+];
+
+const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
+  { value: "all",         label: "All" },
+  { value: "notStarted",  label: "Not Started" },
+  { value: "inProgress",  label: "In Progress" },
+  { value: "completed",   label: "Completed" },
+  { value: "submitted",   label: "Submitted" },
 ];
 
 function sortAssignments(list: Assignment[], key: SortKey): Assignment[] {
@@ -54,15 +66,19 @@ function sortAssignments(list: Assignment[], key: SortKey): Assignment[] {
 }
 
 export default function Tasks() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortKey, setSortKey] = useState<SortKey>("due-asc");
+  const [searchTerm, setSearchTerm]     = useState("");
+  const [sortKey, setSortKey]           = useState<SortKey>("due-asc");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [subjectFilter, setSubjectFilter] = useState<string>("all");
   const [aiOrderedIds, setAiOrderedIds] = useState<number[] | null>(null);
-  const [aiReasoning, setAiReasoning] = useState<string>("");
+  const [aiReasoning, setAiReasoning]   = useState<string>("");
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
 
   const { data: assignments, isLoading } = useListAssignments(
     {},
     { query: { queryKey: getListAssignmentsQueryKey({}) } }
   );
+  const { data: subjects } = useListSubjects();
 
   const aiSortMutation = useSortTasksWithAI();
   const { toast } = useToast();
@@ -101,44 +117,61 @@ export default function Tasks() {
     }
   };
 
-  const filtered = assignments?.filter(a =>
+  // 1. Search
+  const searched = assignments?.filter(a =>
     a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (a.subjectName && a.subjectName.toLowerCase().includes(searchTerm.toLowerCase()))
   ) ?? [];
 
+  // 2. Status filter
+  const statusFiltered = statusFilter === "all"
+    ? searched
+    : searched.filter(a => a.status === statusFilter);
+
+  // 3. Subject filter
+  const subjectFiltered = subjectFilter === "all"
+    ? statusFiltered
+    : statusFiltered.filter(a => String(a.subjectId) === subjectFilter);
+
+  // 4. Sort
   const sorted = (() => {
     if (sortKey === "ai" && aiOrderedIds) {
-      const idMap = new Map(filtered.map(a => [a.id, a]));
+      const idMap = new Map(subjectFiltered.map(a => [a.id, a]));
       const ordered = aiOrderedIds.flatMap(id => idMap.has(id) ? [idMap.get(id)!] : []);
-      const unranked = filtered.filter(a => !aiOrderedIds.includes(a.id));
+      const unranked = subjectFiltered.filter(a => !aiOrderedIds.includes(a.id));
       return [...ordered, ...unranked];
     }
-    return sortAssignments(filtered, sortKey);
+    return sortAssignments(subjectFiltered, sortKey);
   })();
 
   const isAiLoading = sortKey === "ai" && aiSortMutation.isPending;
 
+  const activeFilterCount =
+    (statusFilter !== "all" ? 1 : 0) +
+    (subjectFilter !== "all" ? 1 : 0);
+
   return (
-    <div className="space-y-6 max-w-5xl mx-auto h-full flex flex-col">
+    <div className="space-y-4 max-w-5xl mx-auto h-full flex flex-col">
+      {/* Header */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">All Tasks</h1>
           <p className="text-muted-foreground">Manage everything on your plate.</p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search tasks..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="pl-9 w-full sm:w-[220px]"
+              className="pl-9 w-full sm:w-[200px]"
             />
           </div>
 
           <Select value={sortKey} onValueChange={handleSortChange} disabled={isAiLoading}>
-            <SelectTrigger className="w-[200px] shrink-0">
+            <SelectTrigger className="w-[185px] shrink-0">
               {isAiLoading
                 ? <span className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin" />Thinking…</span>
                 : <SelectValue />}
@@ -154,8 +187,68 @@ export default function Tasks() {
               ))}
             </SelectContent>
           </Select>
+
+          <Button onClick={() => setQuickAddOpen(true)} className="gap-1.5 shrink-0">
+            <Plus className="h-4 w-4" />
+            New Task
+          </Button>
         </div>
       </header>
+
+      {/* Filter bar */}
+      <div className="flex flex-wrap items-center gap-2 shrink-0">
+        <SlidersHorizontal className="h-4 w-4 text-muted-foreground shrink-0" />
+
+        {/* Status chips */}
+        <div className="flex gap-1 flex-wrap">
+          {STATUS_FILTERS.map(f => (
+            <button
+              key={f.value}
+              onClick={() => setStatusFilter(f.value)}
+              className={cn(
+                "px-3 py-1 rounded-full text-xs font-medium border transition-colors",
+                statusFilter === f.value
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "border-border text-muted-foreground hover:border-foreground hover:text-foreground",
+              )}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Subject filter */}
+        {subjects && subjects.length > 0 && (
+          <Select value={subjectFilter} onValueChange={setSubjectFilter}>
+            <SelectTrigger className="h-7 text-xs rounded-full px-3 w-auto min-w-[130px]">
+              <SelectValue placeholder="All subjects" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All subjects</SelectItem>
+              {subjects.map(s => (
+                <SelectItem key={s.id} value={String(s.id)}>
+                  <span className="flex items-center gap-2">
+                    <span
+                      className="inline-block h-2.5 w-2.5 rounded-full shrink-0"
+                      style={{ backgroundColor: s.color ?? "#6366f1" }}
+                    />
+                    {s.name}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+
+        {activeFilterCount > 0 && (
+          <button
+            onClick={() => { setStatusFilter("all"); setSubjectFilter("all"); }}
+            className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+          >
+            Clear filters
+          </button>
+        )}
+      </div>
 
       {aiReasoning && sortKey === "ai" && (
         <div className="flex items-start gap-2 rounded-lg border border-violet-200 bg-violet-50 dark:border-violet-900 dark:bg-violet-950/30 px-3 py-2.5 text-sm text-violet-700 dark:text-violet-300 shrink-0">
@@ -178,11 +271,23 @@ export default function Tasks() {
             </div>
           ) : (
             <div className="text-center p-12 bg-muted/10 border border-border border-dashed rounded-xl">
-              <p className="text-muted-foreground">No tasks found.</p>
+              <p className="text-muted-foreground">
+                {activeFilterCount > 0 ? "No tasks match these filters." : "No tasks found."}
+              </p>
+              {activeFilterCount > 0 && (
+                <button
+                  onClick={() => { setStatusFilter("all"); setSubjectFilter("all"); }}
+                  className="mt-2 text-xs text-primary underline underline-offset-2"
+                >
+                  Clear filters
+                </button>
+              )}
             </div>
           )}
         </div>
       )}
+
+      <QuickAddSheet open={quickAddOpen} onOpenChange={setQuickAddOpen} />
     </div>
   );
 }

@@ -12,6 +12,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Landing from "@/pages/Landing";
 import AppLayout from "@/components/layout/AppLayout";
 import Week from "@/pages/Week";
+import CalendarPage from "@/pages/Calendar";
 import Today from "@/pages/Today";
 import Tasks from "@/pages/Tasks";
 import Notes from "@/pages/Notes";
@@ -143,6 +144,9 @@ function ClerkProviderWithRoutes() {
             </Route>
             <Route path="/notes">
               <AppLayout><Notes /></AppLayout>
+            </Route>
+            <Route path="/calendar">
+              <AppLayout><CalendarPage /></AppLayout>
             </Route>
             <Route path="/settings">
               <AppLayout><Settings /></AppLayout>
