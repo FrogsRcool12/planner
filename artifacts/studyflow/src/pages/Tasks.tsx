@@ -13,10 +13,10 @@ import { cn } from "@/lib/utils";
 import { queryClient } from "@/lib/queryClient";
 
 type SortKey = "due-asc" | "due-desc" | "created-desc" | "created-asc" | "priority-desc" | "priority-asc" | "duration-desc" | "duration-asc" | "ai";
-type StatusFilter = "all" | "notStarted" | "inProgress" | "completed" | "submitted";
+type StatusFilter = "active" | "all" | "notStarted" | "inProgress" | "completed" | "submitted";
 
 const SORT_OPTIONS: { value: SortKey; label: string; ai?: boolean }[] = [
-  { value: "due-asc",       label: "Earliest due"      },
+  { value: "due-asc",       label: "Soonest due"       },
   { value: "due-desc",      label: "Latest due"        },
   { value: "created-desc",  label: "Recently added"    },
   { value: "created-asc",   label: "Oldest first"      },
@@ -28,11 +28,12 @@ const SORT_OPTIONS: { value: SortKey; label: string; ai?: boolean }[] = [
 ];
 
 const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
-  { value: "all",         label: "All" },
+  { value: "active",      label: "Active" },
   { value: "notStarted",  label: "Not Started" },
   { value: "inProgress",  label: "In Progress" },
   { value: "completed",   label: "Completed" },
   { value: "submitted",   label: "Submitted" },
+  { value: "all",         label: "All" },
 ];
 
 function sortAssignments(list: Assignment[], key: SortKey): Assignment[] {
@@ -69,7 +70,7 @@ function sortAssignments(list: Assignment[], key: SortKey): Assignment[] {
 export default function Tasks() {
   const [searchTerm, setSearchTerm]     = useState("");
   const [sortKey, setSortKey]           = useState<SortKey>("due-asc");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
   const [subjectFilter, setSubjectFilter] = useState<string>("all");
   const [aiOrderedIds, setAiOrderedIds] = useState<number[] | null>(null);
   const [aiReasoning, setAiReasoning]   = useState<string>("");
@@ -177,9 +178,12 @@ export default function Tasks() {
   ) ?? [];
 
   // 2. Status filter
-  const statusFiltered = statusFilter === "all"
-    ? searched
-    : searched.filter(a => a.status === statusFilter);
+  const statusFiltered =
+    statusFilter === "all"
+      ? searched
+      : statusFilter === "active"
+        ? searched.filter(a => a.status === "notStarted" || a.status === "inProgress")
+        : searched.filter(a => a.status === statusFilter);
 
   // 3. Subject filter
   const subjectFiltered = subjectFilter === "all"
