@@ -469,6 +469,31 @@ export interface StudyPlanGenerateResult {
   sessions: StudySession[];
 }
 
+export type AISortTasksInputAssignmentsItem = {
+  id: number;
+  title: string;
+  /** @nullable */
+  dueDate?: string | null;
+  /** @nullable */
+  priority?: number | null;
+  /** @nullable */
+  workloadMinutes?: number | null;
+  /** @nullable */
+  taskType?: string | null;
+  /** @nullable */
+  subjectName?: string | null;
+  status: string;
+};
+
+export interface AISortTasksInput {
+  assignments: AISortTasksInputAssignmentsItem[];
+}
+
+export interface AISortTasksResult {
+  orderedIds: number[];
+  reasoning: string;
+}
+
 export type ListAssignmentsParams = {
 weekStart?: string;
 status?: string;

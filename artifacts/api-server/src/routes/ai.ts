@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { openai } from "@workspace/integrations-openai-ai-server";
-import { ParseWithAIBody, GenerateStudyPlanBody } from "@workspace/api-zod";
+import { ParseWithAIBody, GenerateStudyPlanBody, SortTasksWithAIBody } from "@workspace/api-zod";
 
 const router = Router();
 
@@ -88,6 +88,50 @@ Return ONLY JSON: { "sessions": [{ "date": "YYYY-MM-DD", "activity": "brief desc
   } catch (err) {
     req.log.error({ err }, "generateStudyPlan error");
     res.status(500).json({ error: "Study plan generation failed" });
+  }
+});
+
+router.post("/sort-tasks", async (req, res) => {
+  const parsed = SortTasksWithAIBody.safeParse(req.body);
+  if (!parsed.success) return void res.status(400).json({ error: "Invalid input" });
+
+  const { assignments } = parsed.data;
+  const today = new Date().toISOString().split("T")[0];
+
+  const taskList = assignments.map(a =>
+    `ID ${a.id}: "${a.title}" | subject: ${a.subjectName ?? "none"} | due: ${a.dueDate ?? "no due date"} | priority: ${a.priority ?? 3}/5 | workload: ${a.workloadMinutes ?? "?"} min | type: ${a.taskType ?? "assignment"} | status: ${a.status}`
+  ).join("\n");
+
+  const systemPrompt = `You are a smart student productivity assistant. Today is ${today}.
+
+Given a list of tasks, return the optimal order a student should work through them — balancing urgency (due date), importance (priority), effort (workload), and type.
+
+General rules:
+- Overdue or due today tasks come first
+- Higher priority tasks come before lower priority
+- Tests/quizzes outrank regular homework at equal priority
+- Mix in shorter tasks between long ones to maintain momentum
+- Completed or submitted tasks should go last
+
+Return ONLY JSON: { "orderedIds": [id1, id2, ...], "reasoning": "one sentence explanation" }`;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-5.1",
+      max_completion_tokens: 512,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `Order these tasks:\n${taskList}` },
+      ],
+      response_format: { type: "json_object" },
+    });
+
+    const content = completion.choices[0]?.message?.content ?? "{}";
+    const result = JSON.parse(content);
+    res.json({ orderedIds: result.orderedIds ?? [], reasoning: result.reasoning ?? "" });
+  } catch (err) {
+    req.log.error({ err }, "sortTasksWithAI error");
+    res.status(500).json({ error: "AI sort failed" });
   }
 });
 

@@ -22,6 +22,8 @@ import type {
 import type {
   AIParseInput,
   AIParseResult,
+  AISortTasksInput,
+  AISortTasksResult,
   ApiError,
   Assignment,
   AssignmentInput,
@@ -1915,5 +1917,76 @@ export const useGenerateStudyPlan = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getGenerateStudyPlanMutationOptions(options));
+    }
+
+export const getSortTasksWithAIUrl = () => {
+
+
+
+
+  return `/api/ai/sort-tasks`
+}
+
+/**
+ * @summary Get AI-recommended task order
+ */
+export const sortTasksWithAI = async (aISortTasksInput: AISortTasksInput, options?: RequestInit): Promise<AISortTasksResult> => {
+
+  return customFetch<AISortTasksResult>(getSortTasksWithAIUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      aISortTasksInput,)
+  }
+);}
+
+
+
+
+export const getSortTasksWithAIMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sortTasksWithAI>>, TError,{data: BodyType<AISortTasksInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof sortTasksWithAI>>, TError,{data: BodyType<AISortTasksInput>}, TContext> => {
+
+const mutationKey = ['sortTasksWithAI'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sortTasksWithAI>>, {data: BodyType<AISortTasksInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  sortTasksWithAI(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SortTasksWithAIMutationResult = NonNullable<Awaited<ReturnType<typeof sortTasksWithAI>>>
+    export type SortTasksWithAIMutationBody = BodyType<AISortTasksInput>
+    export type SortTasksWithAIMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Get AI-recommended task order
+ */
+export const useSortTasksWithAI = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sortTasksWithAI>>, TError,{data: BodyType<AISortTasksInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof sortTasksWithAI>>,
+        TError,
+        {data: BodyType<AISortTasksInput>},
+        TContext
+      > => {
+      return useMutation(getSortTasksWithAIMutationOptions(options));
     }
 
