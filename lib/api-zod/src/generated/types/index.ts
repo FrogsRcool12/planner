@@ -8,6 +8,9 @@
 
 export * from './aIParseInput';
 export * from './aIParseResult';
+export * from './aISortTasksInput';
+export * from './aISortTasksInputAssignmentsItem';
+export * from './aISortTasksResult';
 export * from './apiError';
 export * from './assignment';
 export * from './assignmentDifficulty';

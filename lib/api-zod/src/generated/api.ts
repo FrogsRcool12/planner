@@ -566,3 +566,25 @@ export const GenerateStudyPlanResponse = zod.object({
 })
 
 
+/**
+ * @summary Get AI-recommended task order
+ */
+export const SortTasksWithAIBody = zod.object({
+  "assignments": zod.array(zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "dueDate": zod.string().nullish(),
+  "priority": zod.number().nullish(),
+  "workloadMinutes": zod.number().nullish(),
+  "taskType": zod.string().nullish(),
+  "subjectName": zod.string().nullish(),
+  "status": zod.string()
+}))
+})
+
+export const SortTasksWithAIResponse = zod.object({
+  "orderedIds": zod.array(zod.number()),
+  "reasoning": zod.string()
+})
+
+
