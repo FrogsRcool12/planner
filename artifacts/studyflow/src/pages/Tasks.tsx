@@ -1,15 +1,16 @@
-import { useState } from "react";
-import { useListAssignments, useListSubjects, useSortTasksWithAI } from "@workspace/api-client-react";
+import { useState, useCallback } from "react";
+import { useListAssignments, useListSubjects, useSortTasksWithAI, useDeleteAssignment, useUpdateAssignment } from "@workspace/api-client-react";
 import { getListAssignmentsQueryKey } from "@workspace/api-client-react";
 import AssignmentCard from "@/components/shared/AssignmentCard";
 import QuickAddSheet from "@/components/shared/QuickAddSheet";
-import { Loader2, Search, Sparkles, Plus, SlidersHorizontal } from "lucide-react";
+import { Loader2, Search, Sparkles, Plus, SlidersHorizontal, CheckSquare, Square, Download, Trash2, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Assignment } from "@workspace/api-client-react/src/generated/api.schemas";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { queryClient } from "@/lib/queryClient";
 
 type SortKey = "due-asc" | "due-desc" | "created-desc" | "created-asc" | "priority-desc" | "priority-asc" | "duration-desc" | "duration-asc" | "ai";
 type StatusFilter = "all" | "notStarted" | "inProgress" | "completed" | "submitted";
@@ -73,6 +74,8 @@ export default function Tasks() {
   const [aiOrderedIds, setAiOrderedIds] = useState<number[] | null>(null);
   const [aiReasoning, setAiReasoning]   = useState<string>("");
   const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const [selectMode, setSelectMode]     = useState(false);
+  const [selectedIds, setSelectedIds]   = useState<Set<number>>(new Set());
 
   const { data: assignments, isLoading } = useListAssignments(
     {},
@@ -80,8 +83,58 @@ export default function Tasks() {
   );
   const { data: subjects } = useListSubjects();
 
-  const aiSortMutation = useSortTasksWithAI();
+  const aiSortMutation   = useSortTasksWithAI();
+  const deleteMutation   = useDeleteAssignment();
+  const updateMutation   = useUpdateAssignment();
   const { toast } = useToast();
+
+  const handleSelect = useCallback((id: number, checked: boolean) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (checked) next.add(id); else next.delete(id);
+      return next;
+    });
+  }, []);
+
+  const exitSelectMode = () => { setSelectMode(false); setSelectedIds(new Set()); };
+
+  const handleBulkMarkDone = async () => {
+    const ids = [...selectedIds];
+    await Promise.all(ids.map(id => updateMutation.mutateAsync({ id, data: { status: "completed" } })));
+    queryClient.invalidateQueries();
+    toast({ title: `${ids.length} task${ids.length > 1 ? "s" : ""} marked done` });
+    exitSelectMode();
+  };
+
+  const handleBulkDelete = async () => {
+    const ids = [...selectedIds];
+    await Promise.all(ids.map(id => deleteMutation.mutateAsync({ id })));
+    queryClient.invalidateQueries();
+    toast({ title: `${ids.length} task${ids.length > 1 ? "s" : ""} deleted` });
+    exitSelectMode();
+  };
+
+  const exportCSV = (list: Assignment[]) => {
+    const header = ["id", "title", "subject", "taskType", "status", "priority", "dueDate", "workloadMinutes", "recurringInterval"].join(",");
+    const rows = list.map(a => [
+      a.id,
+      `"${a.title.replace(/"/g, '""')}"`,
+      `"${(a.subjectName ?? "").replace(/"/g, '""')}"`,
+      a.taskType,
+      a.status,
+      a.priority,
+      a.dueDate ?? "",
+      a.workloadMinutes ?? "",
+      a.recurringInterval ?? "",
+    ].join(","));
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "studyflow-tasks.csv"; a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: `Exported ${list.length} tasks` });
+  };
 
   const handleSortChange = async (value: string) => {
     const key = value as SortKey;
@@ -188,6 +241,25 @@ export default function Tasks() {
             </SelectContent>
           </Select>
 
+          <Button
+            variant="outline"
+            onClick={() => exportCSV(sorted)}
+            className="gap-1.5 shrink-0"
+            title="Export to CSV"
+          >
+            <Download className="h-4 w-4" />
+            Export
+          </Button>
+
+          <Button
+            variant={selectMode ? "secondary" : "outline"}
+            onClick={() => { if (selectMode) exitSelectMode(); else setSelectMode(true); }}
+            className="gap-1.5 shrink-0"
+          >
+            {selectMode ? <Square className="h-4 w-4" /> : <CheckSquare className="h-4 w-4" />}
+            {selectMode ? "Cancel" : "Select"}
+          </Button>
+
           <Button onClick={() => setQuickAddOpen(true)} className="gap-1.5 shrink-0">
             <Plus className="h-4 w-4" />
             New Task
@@ -266,7 +338,13 @@ export default function Tasks() {
           {sorted.length ? (
             <div className="grid gap-3">
               {sorted.map(a => (
-                <AssignmentCard key={a.id} assignment={a} />
+                <AssignmentCard
+                  key={a.id}
+                  assignment={a}
+                  selectMode={selectMode}
+                  selected={selectedIds.has(a.id)}
+                  onSelect={handleSelect}
+                />
               ))}
             </div>
           ) : (
@@ -288,6 +366,38 @@ export default function Tasks() {
       )}
 
       <QuickAddSheet open={quickAddOpen} onOpenChange={setQuickAddOpen} />
+
+      {/* Floating bulk action bar */}
+      {selectMode && selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl bg-card border border-border shadow-xl px-4 py-2.5 animate-in slide-in-from-bottom-4">
+          <span className="text-sm font-medium text-muted-foreground mr-2">
+            {selectedIds.size} selected
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5 text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:border-emerald-800 dark:hover:bg-emerald-950"
+            onClick={handleBulkMarkDone}
+            disabled={updateMutation.isPending}
+          >
+            <CheckCircle2 className="h-4 w-4" />
+            Mark Done
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10"
+            onClick={handleBulkDelete}
+            disabled={deleteMutation.isPending}
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete
+          </Button>
+          <Button size="sm" variant="ghost" onClick={exitSelectMode}>
+            Cancel
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

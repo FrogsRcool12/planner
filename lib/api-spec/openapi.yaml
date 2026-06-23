@@ -618,6 +618,9 @@ components:
           type: boolean
         notes:
           type: ["string", "null"]
+        recurringInterval:
+          type: ["string", "null"]
+          enum: [daily, weekly, biweekly, monthly, null]
         createdAt:
           type: string
           format: date-time
@@ -638,6 +641,7 @@ components:
         - urgency
         - aiGenerated
         - notes
+        - recurringInterval
         - createdAt
 
     AssignmentInput:
@@ -676,6 +680,9 @@ components:
           type: ["string", "null"]
         aiGenerated:
           type: boolean
+        recurringInterval:
+          type: ["string", "null"]
+          enum: [daily, weekly, biweekly, monthly, null]
       required:
         - title
         - taskType

@@ -18,6 +18,7 @@ export const assignments = pgTable("assignments", {
   urgency: text("urgency"),
   aiGenerated: boolean("ai_generated").notNull().default(false),
   notes: text("notes"),
+  recurringInterval: text("recurring_interval"),
   userId: text("user_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
