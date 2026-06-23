@@ -2,21 +2,62 @@ import { useState } from "react";
 import { useListAssignments } from "@workspace/api-client-react";
 import { getListAssignmentsQueryKey } from "@workspace/api-client-react";
 import AssignmentCard from "@/components/shared/AssignmentCard";
-import { Loader2, Search, Filter } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Assignment } from "@workspace/api-client-react/src/generated/api.schemas";
+
+type SortKey = "due-asc" | "due-desc" | "created-desc" | "created-asc" | "priority-desc" | "priority-asc";
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: "due-asc",       label: "Due: Soonest first"  },
+  { value: "due-desc",      label: "Due: Latest first"   },
+  { value: "created-desc",  label: "Newest added"        },
+  { value: "created-asc",   label: "Oldest added"        },
+  { value: "priority-desc", label: "Priority: High → Low" },
+  { value: "priority-asc",  label: "Priority: Low → High" },
+];
+
+function sortAssignments(list: Assignment[], key: SortKey): Assignment[] {
+  return [...list].sort((a, b) => {
+    switch (key) {
+      case "due-asc":
+        if (!a.dueDate && !b.dueDate) return 0;
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      case "due-desc":
+        if (!a.dueDate && !b.dueDate) return 0;
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime();
+      case "created-desc":
+        return new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime();
+      case "created-asc":
+        return new Date(a.createdAt ?? 0).getTime() - new Date(b.createdAt ?? 0).getTime();
+      case "priority-desc":
+        return (b.priority ?? 0) - (a.priority ?? 0);
+      case "priority-asc":
+        return (a.priority ?? 0) - (b.priority ?? 0);
+    }
+  });
+}
 
 export default function Tasks() {
   const [searchTerm, setSearchTerm] = useState("");
-  
+  const [sortKey, setSortKey] = useState<SortKey>("due-asc");
+
   const { data: assignments, isLoading } = useListAssignments(
-    {}, 
+    {},
     { query: { queryKey: getListAssignmentsQueryKey({}) } }
   );
 
-  const filteredAssignments = assignments?.filter(a => 
-    a.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filtered = assignments?.filter(a =>
+    a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (a.subjectName && a.subjectName.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  ) ?? [];
+
+  const sorted = sortAssignments(filtered, sortKey);
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto h-full flex flex-col">
@@ -25,17 +66,30 @@ export default function Tasks() {
           <h1 className="text-3xl font-bold tracking-tight">All Tasks</h1>
           <p className="text-muted-foreground">Manage everything on your plate.</p>
         </div>
-        
+
         <div className="flex gap-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search tasks..." 
+            <Input
+              placeholder="Search tasks..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="pl-9 w-full sm:w-[250px]"
+              className="pl-9 w-full sm:w-[220px]"
             />
           </div>
+
+          <Select value={sortKey} onValueChange={v => setSortKey(v as SortKey)}>
+            <SelectTrigger className="w-[190px] shrink-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SORT_OPTIONS.map(opt => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </header>
 
@@ -45,9 +99,9 @@ export default function Tasks() {
         </div>
       ) : (
         <div className="flex-1 space-y-4 overflow-y-auto pb-20">
-          {filteredAssignments?.length ? (
+          {sorted.length ? (
             <div className="grid gap-3">
-              {filteredAssignments.map(a => (
+              {sorted.map(a => (
                 <AssignmentCard key={a.id} assignment={a} />
               ))}
             </div>
