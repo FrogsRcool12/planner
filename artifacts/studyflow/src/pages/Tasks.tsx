@@ -16,8 +16,8 @@ type SortKey = "due-asc" | "due-desc" | "created-desc" | "created-asc" | "priori
 type StatusFilter = "active" | "all" | "notStarted" | "inProgress" | "completed" | "submitted";
 
 const SORT_OPTIONS: { value: SortKey; label: string; ai?: boolean }[] = [
-  { value: "due-asc",       label: "Soonest due"       },
-  { value: "due-desc",      label: "Latest due"        },
+  { value: "due-asc",       label: "Due soonest"       },
+  { value: "due-desc",      label: "Due latest"        },
   { value: "created-desc",  label: "Recently added"    },
   { value: "created-asc",   label: "Oldest first"      },
   { value: "priority-desc", label: "Highest priority"  },
