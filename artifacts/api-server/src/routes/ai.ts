@@ -106,9 +106,16 @@ router.post("/sort-tasks", async (req, res) => {
 
 Given a list of tasks, return the optimal order a student should work through them — balancing urgency (due date), importance (priority), effort (workload), and type.
 
+Priority star scale (1–5):
+- 1 star = optional / low importance, do last
+- 2 stars = small homework, minor task
+- 3 stars = standard assignment
+- 4 stars = major assignment or test prep
+- 5 stars = urgent / critical, do first
+
 General rules:
 - Overdue or due today tasks come first
-- Higher priority tasks come before lower priority
+- Higher star priority tasks come before lower star priority at equal urgency
 - Tests/quizzes outrank regular homework at equal priority
 - Mix in shorter tasks between long ones to maintain momentum
 - Completed or submitted tasks should go last
