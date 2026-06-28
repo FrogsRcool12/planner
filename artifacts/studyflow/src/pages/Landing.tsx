@@ -21,16 +21,16 @@ const DAYS = [
   { short: "Fri", date: "27" },
 ];
 
-type Cell = { sub: number; task?: string; status?: "done" | "progress" | null } | null;
+type Cell = { sub: number; task?: string; stars?: number; due?: string; mins?: number } | null;
 
 const GRID: Cell[][] = [
-  [{ sub: 0, task: "Worksheet" }, null, { sub: 0 }, null, { sub: 0 }],
-  [{ sub: 1 }, { sub: 2, task: "Essay draft" }, null, { sub: 1, task: "Quiz prep", status: "progress" }, null],
-  [null, { sub: 0 }, { sub: 3 }, null, { sub: 4 }],
-  [{ sub: 2 }, null, { sub: 1 }, { sub: 5 }, null],
-  [{ sub: 4 }, { sub: 3 }, null, { sub: 2 }, { sub: 0, task: "Test", status: "done" }],
-  [null, { sub: 1, task: "Lab report" }, { sub: 5 }, null, { sub: 3 }],
-  [{ sub: 3 }, null, { sub: 2 }, { sub: 4 }, null],
+  [{ sub: 0, task: "Worksheet", stars: 3, due: "Jun 25", mins: 45 }, null, { sub: 0 }, null, { sub: 0 }],
+  [{ sub: 1 }, { sub: 2, task: "Essay draft", stars: 5, due: "Jun 28", mins: 90 }, null, { sub: 1, task: "Quiz prep", stars: 4, due: "Jun 26", mins: 60 }, null],
+  [null, { sub: 0, task: "Ch. 4 reading", due: "Jun 25", mins: 30 }, { sub: 3 }, null, { sub: 4 }],
+  [{ sub: 2 }, null, { sub: 1, task: "Lab report", stars: 3, due: "Jun 27", mins: 75 }, { sub: 5 }, null],
+  [{ sub: 4, task: "Problem set", stars: 2, due: "Jun 30", mins: 50 }, { sub: 3 }, null, { sub: 2 }, { sub: 0, task: "Unit test", stars: 5, due: "Jun 27", mins: 120 }],
+  [null, { sub: 1 }, { sub: 5, task: "Vocab review", due: "Jun 25", mins: 20 }, null, { sub: 3 }],
+  [{ sub: 3, task: "Presentation", stars: 4, due: "Jun 28", mins: 60 }, null, { sub: 2 }, { sub: 4 }, null],
 ];
 
 const STATUS_COLOR: Record<string, string> = {
@@ -38,23 +38,66 @@ const STATUS_COLOR: Record<string, string> = {
   progress: "#f59e0b",
 };
 
-function PlannerMockup() {
-  const bg      = "#0f0f18";
-  const sidebar = "#13131e";
-  const card    = "#1a1a28";
-  const border  = "#252538";
-  const muted   = "#5a5a7a";
-  const text    = "#e2e2f0";
+const bg      = "#0d0d15";
+const sidebar = "#11111a";
+const card    = "#181825";
+const cardHov = "#1e1e2e";
+const border  = "#23233a";
+const muted   = "#52527a";
+const text    = "#e0e0f0";
+const textDim = "#9090b8";
 
+function MiniCard({ cell, sub }: { cell: NonNullable<Cell>; sub: typeof SUBS[0] }) {
+  return (
+    <div style={{
+      borderRadius: 6,
+      border: `1px solid ${border}`,
+      borderLeft: `3px solid ${sub.color}`,
+      background: cardHov,
+      padding: "5px 7px 5px 6px",
+      display: "flex",
+      flexDirection: "column",
+      gap: 3,
+    }}>
+      {/* Row 1: circle + title + stars */}
+      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <div style={{ width: 9, height: 9, borderRadius: "50%", border: `1.5px solid ${muted}`, flexShrink: 0 }} />
+        <span style={{ color: text, fontWeight: 600, fontSize: 8, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {cell.task}
+        </span>
+        {cell.stars && (
+          <span style={{ color: "#facc15", fontSize: 7, letterSpacing: -1, flexShrink: 0 }}>{"★".repeat(cell.stars)}</span>
+        )}
+      </div>
+      {/* Row 2: subject pill + due date + time */}
+      <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
+        <span style={{ padding: "1px 5px", borderRadius: 4, background: `${sub.color}28`, color: sub.color, fontSize: 7, fontWeight: 600 }}>{sub.name}</span>
+        {cell.due && (
+          <span style={{ color: textDim, fontSize: 7, display: "flex", alignItems: "center", gap: 2 }}>
+            <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            {cell.due}
+          </span>
+        )}
+        {cell.mins && (
+          <span style={{ color: textDim, fontSize: 7, display: "flex", alignItems: "center", gap: 2 }}>
+            <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            {cell.mins}m
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PlannerMockup() {
   return (
     <div
       className="w-full rounded-xl overflow-hidden flex font-sans select-none"
-      style={{ background: bg, border: `1px solid ${border}`, minHeight: 340, fontSize: 10 }}
+      style={{ background: bg, border: `1px solid ${border}`, fontSize: 10 }}
     >
       {/* Sidebar */}
-      <div style={{ width: 44, background: sidebar, borderRight: `1px solid ${border}`, display: "flex", flexDirection: "column", alignItems: "center", padding: "12px 0", gap: 6 }}>
-        {/* Logo */}
-        <div style={{ width: 26, height: 26, borderRadius: 8, background: "#6366f1", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: 9, marginBottom: 8 }}>SF</div>
+      <div style={{ width: 46, background: sidebar, borderRight: `1px solid ${border}`, display: "flex", flexDirection: "column", alignItems: "center", padding: "14px 0", gap: 6, flexShrink: 0 }}>
+        <div style={{ width: 28, height: 28, borderRadius: 8, background: "#6366f1", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: 9, marginBottom: 10 }}>SF</div>
         {[
           { Icon: LayoutDashboard, active: false },
           { Icon: Calendar,        active: true  },
@@ -62,43 +105,43 @@ function PlannerMockup() {
           { Icon: BookOpen,        active: false },
           { Icon: BarChart2,       active: false },
         ].map(({ Icon, active }, i) => (
-          <div key={i} style={{ padding: "6px", borderRadius: 8, background: active ? "#6366f120" : "transparent", color: active ? "#818cf8" : muted, display: "flex" }}>
+          <div key={i} style={{ padding: 7, borderRadius: 8, background: active ? "#6366f122" : "transparent", color: active ? "#818cf8" : muted, display: "flex" }}>
             <Icon style={{ width: 14, height: 14 }} />
           </div>
         ))}
-        {/* Avatar at bottom */}
-        <div style={{ marginTop: "auto", width: 26, height: 26, borderRadius: "50%", background: "#6366f140", display: "flex", alignItems: "center", justifyContent: "center", color: "#818cf8", fontSize: 9, fontWeight: 700 }}>JS</div>
+        <div style={{ marginTop: "auto", width: 28, height: 28, borderRadius: "50%", background: "#6366f130", display: "flex", alignItems: "center", justifyContent: "center", color: "#818cf8", fontSize: 9, fontWeight: 700 }}>JS</div>
       </div>
 
-      {/* Main content */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, padding: "14px 14px 10px" }}>
-        {/* Top bar */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+      {/* Main */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, padding: "14px 14px 12px" }}>
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
           <div>
-            <div style={{ color: text, fontWeight: 700, fontSize: 12 }}>Weekly Planner</div>
-            <div style={{ color: muted, fontSize: 9, marginTop: 1 }}>Jun 23 – Jun 27, 2026</div>
+            <div style={{ color: text, fontWeight: 700, fontSize: 13 }}>Weekly Planner</div>
+            <div style={{ color: muted, fontSize: 9, marginTop: 2 }}>Jun 23 – Jun 27, 2026</div>
           </div>
-          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-            {SUBS.slice(0, 4).map((s) => (
-              <div key={s.name} style={{ padding: "2px 7px", borderRadius: 99, background: `${s.color}28`, color: s.color, fontSize: 8, fontWeight: 600 }}>{s.name}</div>
-            ))}
-            <div style={{ padding: "2px 8px", borderRadius: 8, background: "#6366f1", color: "white", fontSize: 8, fontWeight: 600, marginLeft: 4 }}>+ Add</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <div style={{ display: "flex", gap: 4, padding: "3px 6px", borderRadius: 8, border: `1px solid ${border}`, background: card }}>
+              <span style={{ color: muted, fontSize: 10, fontWeight: 600, cursor: "pointer" }}>‹</span>
+              <span style={{ color: textDim, fontSize: 9, fontWeight: 600 }}>Today</span>
+              <span style={{ color: muted, fontSize: 10, fontWeight: 600, cursor: "pointer" }}>›</span>
+            </div>
           </div>
         </div>
 
         {/* Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: `24px repeat(${DAYS.length}, 1fr)`, gap: 3, flex: 1 }}>
+        <div style={{ display: "grid", gridTemplateColumns: `28px repeat(${DAYS.length}, 1fr)`, gap: 4 }}>
           {/* Corner */}
           <div />
           {/* Day headers */}
           {DAYS.map(({ short, date, today }) => (
-            <div key={short} style={{ textAlign: "center", paddingBottom: 6 }}>
+            <div key={short} style={{ textAlign: "center", paddingBottom: 8 }}>
               <div style={{ color: today ? "#818cf8" : muted, fontWeight: 600, fontSize: 9 }}>{short}</div>
               <div style={{
-                width: 20, height: 20, borderRadius: "50%", margin: "2px auto 0",
+                width: 22, height: 22, borderRadius: "50%", margin: "3px auto 0",
                 background: today ? "#6366f1" : "transparent",
                 color: today ? "white" : muted,
-                fontWeight: 700, fontSize: 10,
+                fontWeight: 700, fontSize: 11,
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}>{date}</div>
             </div>
@@ -107,7 +150,7 @@ function PlannerMockup() {
           {/* Period rows */}
           {GRID.map((row, p) => (
             <React.Fragment key={p}>
-              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: 5, color: muted, fontSize: 8, fontWeight: 600 }}>P{p + 1}</div>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: 7, color: muted, fontSize: 8, fontWeight: 700 }}>P{p + 1}</div>
               {row.map((cell, d) => {
                 const sub = cell ? SUBS[cell.sub] : null;
                 const isToday = d === 2;
@@ -115,41 +158,17 @@ function PlannerMockup() {
                   <div
                     key={d}
                     style={{
-                      borderRadius: 7,
-                      border: `1px solid ${isToday ? "#6366f130" : border}`,
-                      background: cell ? `${sub!.color}18` : isToday ? "#6366f108" : card,
-                      padding: "5px 6px",
-                      minHeight: 36,
+                      borderRadius: 8,
+                      border: `1px solid ${isToday ? "#6366f128" : border}`,
+                      background: isToday ? "#6366f108" : card,
+                      padding: 5,
+                      minHeight: 52,
                       display: "flex",
                       flexDirection: "column",
-                      gap: 3,
+                      gap: 4,
                     }}
                   >
-                    {sub && (
-                      <div style={{ color: sub.color, fontWeight: 700, fontSize: 8, letterSpacing: 0.2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sub.name}</span>
-                        {cell?.status && (
-                          <span style={{ width: 5, height: 5, borderRadius: "50%", background: STATUS_COLOR[cell.status], flexShrink: 0 }} />
-                        )}
-                      </div>
-                    )}
-                    {cell?.task && (
-                      <div style={{
-                        borderRadius: 4,
-                        background: `${sub!.color}30`,
-                        color: sub!.color,
-                        fontSize: 7,
-                        fontWeight: 600,
-                        padding: "1px 4px",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                        textDecoration: cell.status === "done" ? "line-through" : "none",
-                        opacity: cell.status === "done" ? 0.6 : 1,
-                      }}>
-                        {cell.task}
-                      </div>
-                    )}
+                    {cell && sub && <MiniCard cell={cell} sub={sub} />}
                   </div>
                 );
               })}
