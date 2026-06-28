@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Brain, Calendar, CheckSquare, Sparkles, LayoutDashboard, ListTodo, BarChart2, BookOpen } from "lucide-react";
 import { motion } from "framer-motion";
 
-const SUBJECTS = [
+const SUBS = [
   { name: "Math",      color: "#6366f1" },
   { name: "Biology",   color: "#10b981" },
   { name: "English",   color: "#f59e0b" },
@@ -13,94 +13,143 @@ const SUBJECTS = [
   { name: "Physics",   color: "#06b6d4" },
 ];
 
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-
-// [period][day] → subject index or null
-const GRID: (number | null)[][] = [
-  [0,    null, 0,    null, 0   ],
-  [1,    2,    null, 1,    null],
-  [null, 0,    3,    null, 4   ],
-  [2,    null, 1,    5,    null],
-  [4,    3,    null, 2,    0   ],
-  [null, 1,    5,    null, 3   ],
-  [3,    null, 2,    4,    null],
+const DAYS = [
+  { short: "Mon", date: "23" },
+  { short: "Tue", date: "24" },
+  { short: "Wed", date: "25", today: true },
+  { short: "Thu", date: "26" },
+  { short: "Fri", date: "27" },
 ];
 
-const TASKS: Record<string, string[]> = {
-  "0-0": ["Worksheet"],
-  "1-1": ["Quiz prep"],
-  "0-2": ["Chapter 4"],
-  "2-3": ["Essay"],
-  "4-4": ["Test"],
+type Cell = { sub: number; task?: string; status?: "done" | "progress" | null } | null;
+
+const GRID: Cell[][] = [
+  [{ sub: 0, task: "Worksheet" }, null, { sub: 0 }, null, { sub: 0 }],
+  [{ sub: 1 }, { sub: 2, task: "Essay draft" }, null, { sub: 1, task: "Quiz prep", status: "progress" }, null],
+  [null, { sub: 0 }, { sub: 3 }, null, { sub: 4 }],
+  [{ sub: 2 }, null, { sub: 1 }, { sub: 5 }, null],
+  [{ sub: 4 }, { sub: 3 }, null, { sub: 2 }, { sub: 0, task: "Test", status: "done" }],
+  [null, { sub: 1, task: "Lab report" }, { sub: 5 }, null, { sub: 3 }],
+  [{ sub: 3 }, null, { sub: 2 }, { sub: 4 }, null],
+];
+
+const STATUS_COLOR: Record<string, string> = {
+  done: "#10b981",
+  progress: "#f59e0b",
 };
 
 function PlannerMockup() {
+  const bg      = "#0f0f18";
+  const sidebar = "#13131e";
+  const card    = "#1a1a28";
+  const border  = "#252538";
+  const muted   = "#5a5a7a";
+  const text    = "#e2e2f0";
+
   return (
-    <div className="w-full rounded-xl overflow-hidden bg-[#f8f8fc] border border-border shadow-sm flex text-[10px] font-sans select-none" style={{ minHeight: 320 }}>
+    <div
+      className="w-full rounded-xl overflow-hidden flex font-sans select-none"
+      style={{ background: bg, border: `1px solid ${border}`, minHeight: 340, fontSize: 10 }}
+    >
       {/* Sidebar */}
-      <div className="w-10 shrink-0 bg-white border-r border-border flex flex-col items-center py-3 gap-4">
-        <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center text-white font-bold text-[8px]">SF</div>
-        <div className="flex flex-col items-center gap-3 mt-2">
-          {[
-            { Icon: LayoutDashboard, active: false },
-            { Icon: Calendar,        active: true  },
-            { Icon: ListTodo,        active: false },
-            { Icon: BookOpen,        active: false },
-            { Icon: BarChart2,       active: false },
-          ].map(({ Icon, active }, i) => (
-            <div key={i} className={`p-1.5 rounded-lg ${active ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
-              <Icon className="w-3 h-3" />
-            </div>
-          ))}
-        </div>
+      <div style={{ width: 44, background: sidebar, borderRight: `1px solid ${border}`, display: "flex", flexDirection: "column", alignItems: "center", padding: "12px 0", gap: 6 }}>
+        {/* Logo */}
+        <div style={{ width: 26, height: 26, borderRadius: 8, background: "#6366f1", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: 9, marginBottom: 8 }}>SF</div>
+        {[
+          { Icon: LayoutDashboard, active: false },
+          { Icon: Calendar,        active: true  },
+          { Icon: ListTodo,        active: false },
+          { Icon: BookOpen,        active: false },
+          { Icon: BarChart2,       active: false },
+        ].map(({ Icon, active }, i) => (
+          <div key={i} style={{ padding: "6px", borderRadius: 8, background: active ? "#6366f120" : "transparent", color: active ? "#818cf8" : muted, display: "flex" }}>
+            <Icon style={{ width: 14, height: 14 }} />
+          </div>
+        ))}
+        {/* Avatar at bottom */}
+        <div style={{ marginTop: "auto", width: 26, height: 26, borderRadius: "50%", background: "#6366f140", display: "flex", alignItems: "center", justifyContent: "center", color: "#818cf8", fontSize: 9, fontWeight: 700 }}>JS</div>
       </div>
 
-      {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0 p-3">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-3">
+      {/* Main content */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, padding: "14px 14px 10px" }}>
+        {/* Top bar */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
           <div>
-            <div className="font-semibold text-[11px] text-foreground">Weekly Planner</div>
-            <div className="text-muted-foreground" style={{ fontSize: 9 }}>Jun 23 – Jun 27, 2026</div>
+            <div style={{ color: text, fontWeight: 700, fontSize: 12 }}>Weekly Planner</div>
+            <div style={{ color: muted, fontSize: 9, marginTop: 1 }}>Jun 23 – Jun 27, 2026</div>
           </div>
-          <div className="flex gap-1">
-            {SUBJECTS.slice(0, 4).map((s) => (
-              <div key={s.name} className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-white" style={{ background: s.color, fontSize: 8 }}>
-                {s.name}
-              </div>
+          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+            {SUBS.slice(0, 4).map((s) => (
+              <div key={s.name} style={{ padding: "2px 7px", borderRadius: 99, background: `${s.color}28`, color: s.color, fontSize: 8, fontWeight: 600 }}>{s.name}</div>
             ))}
+            <div style={{ padding: "2px 8px", borderRadius: 8, background: "#6366f1", color: "white", fontSize: 8, fontWeight: 600, marginLeft: 4 }}>+ Add</div>
           </div>
         </div>
 
         {/* Grid */}
-        <div className="flex-1 grid gap-px" style={{ gridTemplateColumns: `28px repeat(${DAYS.length}, 1fr)` }}>
+        <div style={{ display: "grid", gridTemplateColumns: `24px repeat(${DAYS.length}, 1fr)`, gap: 3, flex: 1 }}>
           {/* Corner */}
           <div />
           {/* Day headers */}
-          {DAYS.map((d) => (
-            <div key={d} className="text-center font-semibold text-muted-foreground pb-1" style={{ fontSize: 9 }}>{d}</div>
+          {DAYS.map(({ short, date, today }) => (
+            <div key={short} style={{ textAlign: "center", paddingBottom: 6 }}>
+              <div style={{ color: today ? "#818cf8" : muted, fontWeight: 600, fontSize: 9 }}>{short}</div>
+              <div style={{
+                width: 20, height: 20, borderRadius: "50%", margin: "2px auto 0",
+                background: today ? "#6366f1" : "transparent",
+                color: today ? "white" : muted,
+                fontWeight: 700, fontSize: 10,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>{date}</div>
+            </div>
           ))}
 
           {/* Period rows */}
           {GRID.map((row, p) => (
             <React.Fragment key={p}>
-              <div className="flex items-center justify-center text-muted-foreground font-medium" style={{ fontSize: 8 }}>P{p + 1}</div>
-              {row.map((subIdx, d) => {
-                const taskKey = `${p}-${d}`;
-                const tasks = TASKS[taskKey];
-                const sub = subIdx !== null ? SUBJECTS[subIdx] : null;
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: 5, color: muted, fontSize: 8, fontWeight: 600 }}>P{p + 1}</div>
+              {row.map((cell, d) => {
+                const sub = cell ? SUBS[cell.sub] : null;
+                const isToday = d === 2;
                 return (
                   <div
-                    key={`${p}-${d}`}
-                    className="rounded border border-border m-px flex flex-col gap-0.5 p-1 min-h-[34px]"
-                    style={{ background: sub ? `${sub.color}14` : "white", borderColor: sub ? `${sub.color}40` : undefined }}
+                    key={d}
+                    style={{
+                      borderRadius: 7,
+                      border: `1px solid ${isToday ? "#6366f130" : border}`,
+                      background: cell ? `${sub!.color}18` : isToday ? "#6366f108" : card,
+                      padding: "5px 6px",
+                      minHeight: 36,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 3,
+                    }}
                   >
                     {sub && (
-                      <div className="font-semibold truncate" style={{ color: sub.color, fontSize: 8 }}>{sub.name}</div>
+                      <div style={{ color: sub.color, fontWeight: 700, fontSize: 8, letterSpacing: 0.2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sub.name}</span>
+                        {cell?.status && (
+                          <span style={{ width: 5, height: 5, borderRadius: "50%", background: STATUS_COLOR[cell.status], flexShrink: 0 }} />
+                        )}
+                      </div>
                     )}
-                    {tasks?.map((t, i) => (
-                      <div key={i} className="rounded px-1 text-white truncate" style={{ background: sub?.color ?? "#6366f1", fontSize: 7 }}>{t}</div>
-                    ))}
+                    {cell?.task && (
+                      <div style={{
+                        borderRadius: 4,
+                        background: `${sub!.color}30`,
+                        color: sub!.color,
+                        fontSize: 7,
+                        fontWeight: 600,
+                        padding: "1px 4px",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        textDecoration: cell.status === "done" ? "line-through" : "none",
+                        opacity: cell.status === "done" ? 0.6 : 1,
+                      }}>
+                        {cell.task}
+                      </div>
+                    )}
                   </div>
                 );
               })}
