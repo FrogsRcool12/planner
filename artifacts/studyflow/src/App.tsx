@@ -56,29 +56,44 @@ const clerkAppearance = {
   },
   elements: {
     rootBox: "w-full flex justify-center",
-    cardBox: "bg-white rounded-2xl w-[440px] max-w-full overflow-hidden shadow-xl border border-gray-100",
+    // Force white background + dark text so dark-mode utilities can't bleed in
+    cardBox: "!bg-white rounded-2xl w-[440px] max-w-full overflow-hidden shadow-xl border !border-gray-100",
     card: "!shadow-none !border-0 !bg-transparent !rounded-none",
     footer: "!shadow-none !border-0 !bg-transparent !rounded-none",
-    headerTitle: "text-2xl font-bold text-gray-900",
-    headerSubtitle: "text-gray-500",
-    formFieldLabel: "text-sm font-medium text-gray-700",
-    formButtonPrimary: "bg-primary hover:bg-primary/90 text-white transition-colors",
-    socialButtonsBlockButton: "border border-gray-200 hover:bg-gray-50 transition-colors",
+    headerTitle: "text-2xl font-bold !text-gray-900",
+    headerSubtitle: "!text-gray-500",
+    formFieldLabel: "text-sm font-medium !text-gray-700",
+    formFieldInput: "!bg-gray-50 !text-gray-900 !border-gray-200",
+    formButtonPrimary: "bg-primary hover:bg-primary/90 !text-white transition-colors",
+    // Explicit dark text on white prevents invisible text in dark-mode host
+    socialButtonsBlockButton: "!border !border-gray-200 hover:!bg-gray-50 !text-gray-700 transition-colors",
+    socialButtonsBlockButtonText: "!text-gray-700",
+    dividerText: "!text-gray-400",
+    footerActionText: "!text-gray-500",
+    footerActionLink: "!text-primary",
+    identityPreviewText: "!text-gray-700",
+    formResendCodeLink: "!text-primary",
+    alternativeMethodsBlockButton: "!text-gray-700",
   },
 };
 
 function SignInPage() {
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-gray-50 px-4">
-      <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} />
+    <div className="flex min-h-[100dvh] items-center justify-center bg-gray-50 px-4 dark:bg-slate-900">
+      {/* Force light mode inside the Clerk card so hardcoded white backgrounds show text correctly */}
+      <div className="light" style={{ colorScheme: "light" }}>
+        <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} />
+      </div>
     </div>
   );
 }
 
 function SignUpPage() {
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-gray-50 px-4">
-      <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} />
+    <div className="flex min-h-[100dvh] items-center justify-center bg-gray-50 px-4 dark:bg-slate-900">
+      <div className="light" style={{ colorScheme: "light" }}>
+        <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} />
+      </div>
     </div>
   );
 }
