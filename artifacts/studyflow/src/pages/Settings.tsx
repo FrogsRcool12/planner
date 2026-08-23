@@ -102,6 +102,27 @@ export default function Settings() {
   const [newSubjColor, setNewSubjColor] = useState("#5835FF");
   const [newSubjPeriod, setNewSubjPeriod] = useState<string>("none");
 
+  const selectTheme = (nextTheme: string) => {
+    setTheme(nextTheme);
+
+    if (nextTheme === "seasonal") {
+      const month = new Date().getMonth() + 1;
+      const season =
+        month === 10
+          ? "spooky"
+          : month === 6 || month === 7 || month === 8
+            ? "summer"
+            : month === 9 || month === 11
+              ? "fall"
+              : month === 12 || month === 1 || month === 2
+                ? "winter"
+                : "spring";
+      document.documentElement.setAttribute("data-season", season);
+    } else {
+      document.documentElement.removeAttribute("data-season");
+    }
+  };
+
   // Local ordered list — kept in sync with server data, sorted by period
   const [ordered, setOrdered] = useState<Subject[]>([]);
 
@@ -203,7 +224,7 @@ export default function Settings() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <Button
             variant={theme === "light" ? "default" : "outline"}
-            onClick={() => setTheme("light")}
+            onClick={() => selectTheme("light")}
             className="flex flex-col gap-2 h-auto py-4"
           >
             <Sun className="h-5 w-5" />
@@ -211,7 +232,7 @@ export default function Settings() {
           </Button>
           <Button
             variant={theme === "dark" ? "default" : "outline"}
-            onClick={() => setTheme("dark")}
+            onClick={() => selectTheme("dark")}
             className="flex flex-col gap-2 h-auto py-4"
           >
             <Moon className="h-5 w-5" />
@@ -219,7 +240,7 @@ export default function Settings() {
           </Button>
           <Button
             variant={theme === "system" ? "default" : "outline"}
-            onClick={() => setTheme("system")}
+            onClick={() => selectTheme("system")}
             className="flex flex-col gap-2 h-auto py-4"
           >
             <Monitor className="h-5 w-5" />
@@ -227,7 +248,7 @@ export default function Settings() {
           </Button>
           <Button
             variant={theme === "seasonal" ? "default" : "outline"}
-            onClick={() => setTheme("seasonal")}
+            onClick={() => selectTheme("seasonal")}
             className="flex flex-col gap-2 h-auto py-4"
           >
             <Sparkles className="h-5 w-5" />
