@@ -3,7 +3,7 @@ import { useListSubjects, useCreateSubject, useDeleteSubject, useUpdateSubject }
 import { getListSubjectsQueryKey } from "@workspace/api-client-react";
 import { Subject } from "@workspace/api-client-react/src/generated/api.schemas";
 import { useTheme } from "next-themes";
-import { Loader2, Plus, Trash2, Moon, Sun, Monitor, GripVertical } from "lucide-react";
+import { Loader2, Plus, Trash2, Moon, Sun, Monitor, GripVertical, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -200,7 +200,7 @@ export default function Settings() {
       {/* Theme Settings */}
       <section className="space-y-4 bg-card p-6 rounded-xl border border-border shadow-sm">
         <h2 className="text-xl font-semibold">Appearance</h2>
-        <div className="grid grid-cols-3 gap-4 max-w-sm">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <Button
             variant={theme === "light" ? "default" : "outline"}
             onClick={() => setTheme("light")}
@@ -225,7 +225,18 @@ export default function Settings() {
             <Monitor className="h-5 w-5" />
             <span>System</span>
           </Button>
+          <Button
+            variant={theme === "seasonal" ? "default" : "outline"}
+            onClick={() => setTheme("seasonal")}
+            className="flex flex-col gap-2 h-auto py-4"
+          >
+            <Sparkles className="h-5 w-5" />
+            <span>Seasonal</span>
+          </Button>
         </div>
+        <p className="text-sm text-muted-foreground">
+          Seasonal automatically changes its colors throughout the year: beach tones in summer, falling leaves in autumn, spooky colors in October, and fresh palettes for spring and winter.
+        </p>
       </section>
 
       {/* Subject Management */}
