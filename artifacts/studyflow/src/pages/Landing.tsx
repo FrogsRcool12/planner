@@ -97,7 +97,7 @@ function PlannerMockup() {
     >
       {/* Sidebar */}
       <div style={{ width: 46, background: sidebar, borderRight: `1px solid ${border}`, display: "flex", flexDirection: "column", alignItems: "center", padding: "14px 0", gap: 6, flexShrink: 0 }}>
-        <div style={{ width: 28, height: 28, borderRadius: 8, background: "#6366f1", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: 9, marginBottom: 10 }}>SF</div>
+        <div style={{ width: 28, height: 28, borderRadius: 8, background: "#6366f1", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: 9, marginBottom: 10 }}>SP</div>
         {[
           { Icon: LayoutDashboard, active: false },
           { Icon: Calendar,        active: true  },
@@ -256,8 +256,8 @@ export default function Landing() {
       <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold">SF</div>
-            <span className="font-bold text-xl tracking-tight">StudyFlow</span>
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold">SP</div>
+             <span className="font-bold text-xl tracking-tight">Smart Planner</span>
           </div>
           <div className="flex gap-4">
             <Link href={`${basePath}/sign-in`}>
@@ -286,7 +286,7 @@ export default function Landing() {
               The smartest way to organize your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">school life</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-              Drop in your syllabus, paste an assignment, or just type what's due. StudyFlow extracts it, schedules it, and helps you get it done.
+               Drop in your syllabus, paste an assignment, or just type what's due. Smart Planner extracts it, schedules it, and helps you get it done.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link href={`${basePath}/sign-up`}>
@@ -351,7 +351,7 @@ export default function Landing() {
             <p className="text-lg text-muted-foreground mb-8">
               "Math worksheet due tomorrow, biology quiz on Friday, and read chapter 4 for history."
               <br /><br />
-              Just type how you think. StudyFlow understands the context, categorizes by subject, and places it exactly where it belongs on your calendar.
+               Just type how you think. Smart Planner understands the context, categorizes by subject, and places it exactly where it belongs on your calendar.
             </p>
             <ul className="space-y-4">
               {["Auto-categorization by subject", "Smart due date detection", "Workload time estimation"].map((feature, i) => (
@@ -373,10 +373,10 @@ export default function Landing() {
       <footer className="border-t border-border bg-card/50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-muted-foreground">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="h-6 w-6 rounded flex items-center justify-center bg-muted text-foreground font-bold text-xs">SF</div>
-            <span className="font-semibold text-foreground">StudyFlow</span>
+            <div className="h-6 w-6 rounded flex items-center justify-center bg-muted text-foreground font-bold text-xs">SP</div>
+             <span className="font-semibold text-foreground">Smart Planner</span>
           </div>
-          <p>© {new Date().getFullYear()} StudyFlow. Designed for students.</p>
+          <p>© {new Date().getFullYear()} Smart Planner. Designed for students.</p>
         </div>
       </footer>
     </div>

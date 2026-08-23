@@ -330,11 +330,11 @@ export default function Settings() {
       {/* Help */}
       <section className="space-y-4 bg-card p-6 rounded-xl border border-border shadow-sm">
         <h2 className="text-xl font-semibold">Help</h2>
-        <p className="text-sm text-muted-foreground">New to StudyFlow? Replay the onboarding tutorial to learn about all the features.</p>
+         <p className="text-sm text-muted-foreground">New to Smart Planner? Replay the onboarding tutorial to learn about all the features.</p>
         <Button
           variant="outline"
           onClick={() => {
-            localStorage.removeItem("studyflow_tutorial_completed");
+             localStorage.removeItem("smart_planner_tutorial_completed");
             window.location.reload();
           }}
         >
