@@ -118,8 +118,12 @@ export default function Settings() {
                 ? "winter"
                 : "spring";
       document.documentElement.setAttribute("data-season", season);
+      const favicon = document.querySelector<HTMLLinkElement>("link[rel='icon']");
+      if (favicon) favicon.href = `/favicon-${season}.svg`;
     } else {
       document.documentElement.removeAttribute("data-season");
+      const favicon = document.querySelector<HTMLLinkElement>("link[rel='icon']");
+      if (favicon) favicon.href = "/favicon.svg";
     }
   };
 
