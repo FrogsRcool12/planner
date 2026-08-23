@@ -39,7 +39,10 @@ export function ThemeProvider({
   ...props
 }: React.ComponentProps<typeof NextThemesProvider>) {
   return (
-    <NextThemesProvider {...props}>
+    <NextThemesProvider
+      {...props}
+      themes={["light", "dark", "system", "seasonal"]}
+    >
       <SeasonalThemeSync />
       {children}
     </NextThemesProvider>
