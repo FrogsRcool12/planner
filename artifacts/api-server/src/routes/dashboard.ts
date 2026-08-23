@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { assignments, notes, reminders, subjects } from "@workspace/db";
-import { eq, and, lte, gte, lt } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 const router = Router();
 
@@ -28,6 +28,106 @@ function formatAssignment(
     notes: a.notes ?? null,
     createdAt: a.createdAt.toISOString(),
   };
+}
+
+function buildSmartReminders(
+  rows: Array<{
+    assignment: typeof assignments.$inferSelect;
+    subject: { name: string; color: string } | null;
+  }>,
+  today: string,
+) {
+  const activeRows = rows.filter(
+    ({ assignment: a }) =>
+      a.status !== "completed" &&
+      a.status !== "submitted" &&
+      a.dueDate !== null,
+  );
+  const reminders: Array<{
+    id: number;
+    message: string;
+    type: "smart";
+    isRead: boolean;
+    createdAt: string;
+  }> = [];
+
+  const addReminder = (
+    assignment: typeof assignments.$inferSelect,
+    subject: { name: string; color: string } | null,
+    message: string,
+  ) => {
+    // Negative virtual IDs cannot collide with persisted reminder IDs.
+    reminders.push({
+      id: -assignment.id,
+      message,
+      type: "smart",
+      isRead: false,
+      createdAt: assignment.createdAt.toISOString(),
+    });
+  };
+
+  const overdue = activeRows
+    .filter(({ assignment: a }) => a.dueDate! < today)
+    .sort((a, b) => a.assignment.dueDate!.localeCompare(b.assignment.dueDate!));
+  overdue.slice(0, 3).forEach(({ assignment: a, subject: s }) => {
+    addReminder(
+      a,
+      s,
+      `${a.title}${s ? ` for ${s.name}` : ""} is overdue. Update its status or reschedule it.`,
+    );
+  });
+
+  const todayRows = activeRows
+    .filter(({ assignment: a }) => a.dueDate === today)
+    .sort((a, b) => b.assignment.priority - a.assignment.priority);
+  todayRows.slice(0, 2).forEach(({ assignment: a, subject: s }) => {
+    addReminder(
+      a,
+      s,
+      `${a.title}${s ? ` for ${s.name}` : ""} is due today${a.workloadMinutes ? ` and may take about ${a.workloadMinutes} minutes` : ""}.`,
+    );
+  });
+
+  const todayDate = new Date(`${today}T00:00:00Z`);
+  const sevenDaysFromNow = new Date(todayDate);
+  sevenDaysFromNow.setUTCDate(sevenDaysFromNow.getUTCDate() + 7);
+  const sevenDayDate = sevenDaysFromNow.toISOString().split("T")[0];
+  const upcomingTests = activeRows
+    .filter(({ assignment: a }) =>
+      (a.taskType === "test" || a.taskType === "quiz") &&
+      a.dueDate! > today &&
+      a.dueDate! <= sevenDayDate,
+    )
+    .sort((a, b) => a.assignment.dueDate!.localeCompare(b.assignment.dueDate!));
+  upcomingTests.slice(0, 2).forEach(({ assignment: a, subject: s }) => {
+    addReminder(
+      a,
+      s,
+      `${a.taskType === "test" ? "Test" : "Quiz"}: ${a.title}${s ? ` for ${s.name}` : ""} is coming up on ${a.dueDate}. Start reviewing soon.`,
+    );
+  });
+
+  const highPrioritySoon = activeRows
+    .filter(({ assignment: a }) =>
+      a.priority >= 4 &&
+      a.dueDate! > today &&
+      a.dueDate! <= sevenDayDate &&
+      a.taskType !== "test" &&
+      a.taskType !== "quiz",
+    )
+    .sort((a, b) => {
+      const dueDateOrder = a.assignment.dueDate!.localeCompare(b.assignment.dueDate!);
+      return dueDateOrder || b.assignment.priority - a.assignment.priority;
+    });
+  highPrioritySoon.slice(0, 2).forEach(({ assignment: a, subject: s }) => {
+    addReminder(
+      a,
+      s,
+      `${a.title}${s ? ` for ${s.name}` : ""} is a high-priority task due on ${a.dueDate}.`,
+    );
+  });
+
+  return reminders;
 }
 
 router.get("/summary", async (req, res) => {
@@ -66,18 +166,21 @@ router.get("/summary", async (req, res) => {
         and(
           userId ? eq(reminders.userId, userId) : undefined,
           eq(reminders.isRead, false),
+          eq(reminders.type, "manual"),
         ),
       )
       .orderBy(reminders.createdAt)
       .limit(10);
 
-    const formattedReminders = reminderRows.map((r) => ({
+    const manualReminders = reminderRows.map((r) => ({
       id: r.id,
       message: r.message,
       type: r.type,
       isRead: r.isRead,
       createdAt: r.createdAt.toISOString(),
     }));
+    const smartReminders = buildSmartReminders(allRows, today);
+    const formattedReminders = [...smartReminders, ...manualReminders].slice(0, 10);
 
     res.json({
       todayAssignments,
