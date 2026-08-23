@@ -109,6 +109,117 @@
   --destructive-foreground: 0 0% 100%;
 }
 
+/* Seasonal palettes are selected automatically by month while the theme is active. */
+[data-season="summer"] {
+  --background: 196 55% 96%;
+  --foreground: 205 35% 20%;
+  --border: 196 28% 82%;
+  --input: 196 28% 82%;
+  --ring: 194 70% 45%;
+  --card: 42 62% 98%;
+  --card-foreground: 205 35% 20%;
+  --card-border: 196 28% 86%;
+  --popover: 42 62% 98%;
+  --popover-foreground: 205 35% 20%;
+  --popover-border: 196 28% 82%;
+  --primary: 194 70% 45%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 42 55% 88%;
+  --secondary-foreground: 205 35% 20%;
+  --muted: 42 35% 91%;
+  --muted-foreground: 205 20% 43%;
+  --accent: 42 70% 88%;
+  --accent-foreground: 194 60% 28%;
+}
+
+[data-season="fall"] {
+  --background: 35 35% 95%;
+  --foreground: 24 35% 19%;
+  --border: 28 28% 82%;
+  --input: 28 28% 82%;
+  --ring: 19 72% 45%;
+  --card: 40 45% 98%;
+  --card-foreground: 24 35% 19%;
+  --card-border: 28 28% 86%;
+  --popover: 40 45% 98%;
+  --popover-foreground: 24 35% 19%;
+  --popover-border: 28 28% 82%;
+  --primary: 19 72% 45%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 42 48% 87%;
+  --secondary-foreground: 24 35% 19%;
+  --muted: 35 30% 89%;
+  --muted-foreground: 24 20% 43%;
+  --accent: 83 32% 82%;
+  --accent-foreground: 24 40% 27%;
+}
+
+[data-season="spooky"] {
+  --background: 270 24% 12%;
+  --foreground: 35 55% 94%;
+  --border: 270 20% 25%;
+  --input: 270 20% 25%;
+  --ring: 28 90% 55%;
+  --card: 270 22% 16%;
+  --card-foreground: 35 55% 94%;
+  --card-border: 270 20% 25%;
+  --popover: 270 22% 16%;
+  --popover-foreground: 35 55% 94%;
+  --popover-border: 270 20% 25%;
+  --primary: 28 90% 55%;
+  --primary-foreground: 270 30% 10%;
+  --secondary: 105 45% 35%;
+  --secondary-foreground: 35 55% 94%;
+  --muted: 270 18% 22%;
+  --muted-foreground: 35 25% 72%;
+  --accent: 105 45% 25%;
+  --accent-foreground: 105 65% 82%;
+}
+
+[data-season="winter"] {
+  --background: 210 45% 96%;
+  --foreground: 215 35% 20%;
+  --border: 210 28% 84%;
+  --input: 210 28% 84%;
+  --ring: 205 70% 48%;
+  --card: 0 0% 100%;
+  --card-foreground: 215 35% 20%;
+  --card-border: 210 28% 88%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 215 35% 20%;
+  --popover-border: 210 28% 84%;
+  --primary: 205 70% 48%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 38% 89%;
+  --secondary-foreground: 215 35% 20%;
+  --muted: 210 28% 92%;
+  --muted-foreground: 215 20% 46%;
+  --accent: 350 55% 91%;
+  --accent-foreground: 350 55% 35%;
+}
+
+[data-season="spring"] {
+  --background: 128 35% 96%;
+  --foreground: 145 28% 20%;
+  --border: 128 24% 83%;
+  --input: 128 24% 83%;
+  --ring: 145 55% 42%;
+  --card: 72 45% 99%;
+  --card-foreground: 145 28% 20%;
+  --card-border: 128 24% 87%;
+  --popover: 72 45% 99%;
+  --popover-foreground: 145 28% 20%;
+  --popover-border: 128 24% 83%;
+  --primary: 145 55% 42%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 330 42% 90%;
+  --secondary-foreground: 145 28% 20%;
+  --muted: 128 25% 91%;
+  --muted-foreground: 145 18% 44%;
+  --accent: 330 50% 92%;
+  --accent-foreground: 330 52% 36%;
+}
+
 @layer base {
   * {
     @apply border-border;
