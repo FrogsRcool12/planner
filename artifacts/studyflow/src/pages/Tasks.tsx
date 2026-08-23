@@ -132,7 +132,7 @@ export default function Tasks() {
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = "studyflow-tasks.csv"; a.click();
+     a.href = url; a.download = "smart-planner-tasks.csv"; a.click();
     URL.revokeObjectURL(url);
     toast({ title: `Exported ${list.length} tasks` });
   };

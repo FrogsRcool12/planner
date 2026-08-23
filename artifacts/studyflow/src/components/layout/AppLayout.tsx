@@ -42,9 +42,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <aside className="hidden md:flex w-64 flex-col border-r border-border bg-card">
         <div className="p-6 flex items-center gap-3">
           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold">
-            SF
+            SP
           </div>
-          <span className="font-bold tracking-tight text-lg">StudyFlow</span>
+           <span className="font-bold tracking-tight text-lg">Smart Planner</span>
         </div>
         
         <nav className="flex-1 px-4 space-y-1">
@@ -86,9 +86,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold">
-            SF
+             SP
           </div>
-          <span className="font-bold tracking-tight text-lg">StudyFlow</span>
+           <span className="font-bold tracking-tight text-lg">Smart Planner</span>
         </div>
         <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
           {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

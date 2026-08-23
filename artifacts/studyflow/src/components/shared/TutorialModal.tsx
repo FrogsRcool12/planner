@@ -16,7 +16,7 @@ import {
   Plus,
 } from "lucide-react";
 
-const STORAGE_KEY = "studyflow_tutorial_completed";
+const STORAGE_KEY = "smart_planner_tutorial_completed";
 const PAD = 12;
 
 interface SpotlightRect { x: number; y: number; w: number; h: number; }
@@ -39,7 +39,7 @@ const STEPS: StepConfig[] = [
     icon: <Zap className="h-6 w-6" />,
     page: null,
     targetSelector: null,
-    title: "Welcome to StudyFlow",
+     title: "Welcome to Smart Planner",
     description: "Your AI-powered academic operating system. Let's take a 60-second tour of the key features.",
     cta: null,
     accentColor: "#6366f1",
@@ -111,7 +111,7 @@ const STEPS: StepConfig[] = [
     page: null,
     targetSelector: null,
     title: "You're all set!",
-    description: "Next up: add your subjects and give them colors. StudyFlow works best when it knows your schedule.",
+     description: "Next up: add your subjects and give them colors. Smart Planner works best when it knows your schedule.",
     cta: null,
     accentColor: "#6366f1",
   },
@@ -435,7 +435,7 @@ export default function TutorialModal() {
                       style={{ background: `${cur.accentColor}15`, color: cur.accentColor }}
                     >
                       {step === 0
-                        ? <span className="text-4xl font-extrabold" style={{ color: cur.accentColor }}>SF</span>
+                         ? <span className="text-4xl font-extrabold" style={{ color: cur.accentColor }}>SP</span>
                         : <div className="scale-[1.6]">{cur.icon}</div>
                       }
                     </motion.div>
